@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 PY := .venv/bin/python
 KLAB := .venv/bin/klab
+KL_PAGES_URL ?= https://m0-ar.github.io/keylevel-mtf-research
 
 .PHONY: setup download build test run development validation holdout audit freeze live report paper pdf reproduce clean
 
@@ -37,7 +38,7 @@ live:
 	$(KLAB) --config config/base.yaml live
 
 report:
-	$(KLAB) --config config/base.yaml report
+	KL_PAGES_URL=$(KL_PAGES_URL) $(KLAB) --config config/base.yaml report
 
 paper: report
 	@echo "Paper source is paper/main.tex; RESEARCH.md is the working paper. Run 'make pdf' to compile."

@@ -196,7 +196,7 @@ If the answer to any of these is “no”, the backtest is a story, not evidence
 | Minute | Do this | Why |
 |:---|:---|:---|
 | 0–5 | Read the 30-second summary above. | Get the verdict before the details. |
-| 5–15 | Open the [interactive report](preview.html) and take the 12-question quiz. | Learn by doing, with instant explanations. |
+| 5–15 | Open the [interactive report](https://m0-ar.github.io/keylevel-mtf-research) and take the 12-question quiz. | Learn by doing, with instant explanations. |
 | 15–30 | Read [The evidence in one screen](#-the-evidence-in-one-screen). | See the numbers behind the verdict. |
 | 30–45 | Read [What was tested](#-what-was-tested) and [Why the strategy fails](#-why-the-strategy-fails). | Understand the mechanism, not just the result. |
 | 45–60 | Read [Why you can trust the numbers](#-why-you-can-trust-the-numbers). | Learn the controls that separate research from marketing. |
@@ -541,7 +541,7 @@ A good research asset states its limits. This one does.
 
 ## 🖥️ Interactive report
 
-[**Open the interactive report →**](preview.html)
+[**Open the live interactive report →**](https://m0-ar.github.io/keylevel-mtf-research)
 
 ![KeyLevel Lab interactive report](assets/demo.gif)
 
@@ -729,7 +729,7 @@ export KL_PAGES_URL="https://<your-username>.github.io/<your-repository>"
 make report
 ```
 
-The `Open the interactive report` button in this README will then point at the live site instead of the local file.
+The `Open the live interactive report` button in this README will then point at the live site instead of the local file.
 
 **Social preview.** Open **Settings → General → Social preview** and upload `assets/social-preview.png` (1280 × 640, under 1 MB). It is the image people see when the repository is shared on LinkedIn, X, Slack, or chat apps.
 
@@ -889,6 +889,6 @@ If you use this repository in research, teaching, or a commercial engagement, ci
 
 Generated 02 November 2026 · Code freeze `bb94af28645d` · 27 frozen files · 2,930,707 bars · 14,602 trades
 
-[Back to top](#keylevel-lab) · [Academic paper](paper/main.pdf) · [Long-form report](RESEARCH.md) · [Interactive report](preview.html)
+[Back to top](#keylevel-lab) · [Academic paper](paper/main.pdf) · [Long-form report](RESEARCH.md) · [Interactive report](https://m0-ar.github.io/keylevel-mtf-research)
 
 </div>
