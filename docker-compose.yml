@@ -1,0 +1,34 @@
+services:
+  research:
+    build: .
+    image: keylevel-mtf-research:0.1.0
+    working_dir: /research
+    volumes:
+      - ./data:/research/data
+      - ./results:/research/results
+      - ./logs:/research/logs
+      - ./paper:/research/paper
+    command: >
+      bash -lc "python -m klab.cli download &&
+                python -m klab.cli build &&
+                python -m klab.cli run --stage development &&
+                python -m klab.cli run --stage validation &&
+                python -m klab.cli audit &&
+                python -m klab.cli live &&
+                python -m klab.cli report"
+    environment:
+      - PYTHONHASHSEED=0
+
+  jupyter:
+    image: keylevel-mtf-research:0.1.0
+    build: .
+    working_dir: /research
+    volumes:
+      - .:/research
+    ports:
+      - "8888:8888"
+    command: >
+      bash -lc "pip install jupyterlab &&
+                jupyter lab --ip=0.0.0.0 --port=8888 --no-browser
+                --NotebookApp.token='' --NotebookApp.password=''"
+    profiles: ["interactive"]

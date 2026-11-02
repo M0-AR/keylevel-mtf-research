@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeyLevel Lab — Do multi-timeframe key levels work?</title>
+<meta name="description" content="A pre-registered test of the multi-timeframe key-level trading strategy on 2.93 million bars and a sealed 2023–2025 holdout. The verdict: a null result, and a reusable due-diligence method.">
+<meta name="theme-color" content="#070b14">
+<meta property="og:title" content="KeyLevel Lab — Do multi-timeframe key levels work?">
+<meta property="og:description" content="A pre-registered test on eight liquid instruments, 14,602 trades, and a sealed holdout. The answer is clear — and useful.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b14'/%3E%3Cpath d='M14 44 L26 30 L36 38 L50 18' stroke='%23e0a43a' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#070b14; --bg2:#0a1120; --panel:#0e1626; --panel2:#121d31;
+  --ink:#e8eef7; --muted:#9fb0c8; --line:rgba(255,255,255,.10);
+  --gold:#e0a43a; --gold2:#f4d28a; --teal:#2dd4bf; --coral:#f87171; --blue:#60a5fa;
+  --paper:#f6f8fc; --paper-ink:#0b1220; --paper-muted:#475569;
+  --shadow:0 24px 70px rgba(0,0,0,.36);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(224,164,58,.18), transparent 60%),
+    radial-gradient(900px 520px at 88% 4%, rgba(45,212,191,.12), transparent 58%),
+    radial-gradient(800px 600px at 50% 100%, rgba(96,165,250,.08), transparent 60%),
+    var(--bg);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--gold2); text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%; display:block}
+button,input,select{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold2); outline-offset:3px; border-radius:6px}
+.skip{position:absolute; left:-999px; top:10px; background:var(--gold2); color:#111; padding:10px 16px; z-index:99; border-radius:8px}
+.skip:focus{left:10px}
+.wrap{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+
+/* Header */
+header.site{
+  position:sticky; top:0; z-index:50; backdrop-filter:blur(16px);
+  background:rgba(7,11,20,.78); border-bottom:1px solid var(--line);
+}
+.nav{display:flex; align-items:center; justify-content:space-between; gap:18px; padding:14px 0}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em; color:var(--ink)}
+.brand:hover{text-decoration:none}
+.mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(145deg,var(--gold),#8a5a12); display:grid; place-items:center; color:#0b1220; font-size:.8rem; font-weight:900}
+.nav-links{display:flex; gap:18px; flex-wrap:wrap; font-size:.88rem}
+.nav-links a{color:var(--muted)}
+.nav-links a:hover{color:var(--ink); text-decoration:none}
+.nav-cta{display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border-radius:999px; background:var(--gold2); color:#111; font-weight:800; font-size:.84rem}
+.nav-cta:hover{text-decoration:none; filter:brightness(1.05)}
+
+/* Hero */
+.hero{padding:64px 0 34px}
+.hero-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:34px; align-items:center}
+.eyebrow{display:inline-flex; align-items:center; gap:9px; color:var(--gold2); font-size:.76rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase}
+.eyebrow:before{content:""; width:28px; height:1px; background:var(--gold2); display:inline-block}
+h1{font-size:clamp(2.4rem,5.4vw,4.7rem); line-height:1.02; letter-spacing:-.045em; margin:16px 0 18px}
+.grad{background:linear-gradient(115deg,#fff 8%,var(--gold2) 52%,var(--teal) 100%); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lead{font-size:clamp(1.02rem,1.5vw,1.18rem); color:var(--muted); max-width:62ch; margin:0 0 24px}
+.verdict-pill{display:inline-flex; align-items:center; gap:10px; padding:10px 15px; border-radius:999px; border:1px solid rgba(248,113,113,.42); background:rgba(248,113,113,.10); color:#fecaca; font-weight:800; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--coral); box-shadow:0 0 0 5px rgba(248,113,113,.14)}
+.cta-row{display:flex; gap:12px; flex-wrap:wrap; margin:24px 0 14px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:13px 20px; border-radius:12px; border:1px solid transparent; font-weight:800; font-size:.94rem; transition:transform .18s ease, filter .18s ease, background .18s ease}
+.btn:hover{text-decoration:none; transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#111; box-shadow:0 12px 30px rgba(224,164,58,.18)}
+.btn-ghost{border-color:var(--line); color:var(--ink); background:rgba(255,255,255,.03)}
+.btn-ghost:hover{background:rgba(255,255,255,.07)}
+.micro{color:var(--muted); font-size:.84rem; max-width:62ch}
+.hero-card{
+  position:relative; border-radius:28px; padding:24px; border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.hero-card:before{content:""; position:absolute; inset:-40% -20% auto auto; width:280px; height:280px; background:radial-gradient(circle,rgba(224,164,58,.22),transparent 65%); pointer-events:none}
+.verdict-big{font-size:clamp(2rem,4vw,3.1rem); line-height:1; letter-spacing:-.05em; font-weight:900; color:#fecaca; margin:4px 0 6px}
+.verdict-sub{color:var(--muted); font-size:.92rem; margin:0 0 18px}
+.kpis{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.kpi{padding:14px; border-radius:14px; background:rgba(0,0,0,.22); border:1px solid var(--line)}
+.kpi b{display:block; font-size:1.35rem; letter-spacing:-.03em}
+.kpi span{display:block; color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.08em; margin-top:4px}
+.kpi.neg b{color:#fca5a5}
+.kpi.pos b{color:#5eead4}
+.hero-note{margin:14px 0 0; color:var(--muted); font-size:.78rem}
+
+/* Sections */
+section{padding:72px 0; border-top:1px solid rgba(255,255,255,.06)}
+section.hero{border-top:0}
+.section-head{max-width:78ch; margin-bottom:30px}
+h2{font-size:clamp(1.7rem,3vw,2.6rem); line-height:1.1; letter-spacing:-.035em; margin:10px 0 12px}
+h3{font-size:1.12rem; letter-spacing:-.015em; margin:0 0 8px}
+.lead-sm{color:var(--muted); font-size:1rem; margin:0}
+.pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 0}
+.pill{display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); color:var(--muted); font-size:.76rem; background:rgba(255,255,255,.03)}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+.grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.hero-grid>*,.explorer>*,.quiz-shell>*,.grid-2>*,.grid-3>*,.grid-4>*,.chart-grid>*,.footer-grid>*{min-width:0}
+.card{padding:20px; border-radius:var(--radius); border:1px solid var(--line); background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); box-shadow:0 14px 40px rgba(0,0,0,.16)}
+.card p:last-child{margin-bottom:0}
+.card .big{font-size:1.7rem; font-weight:900; letter-spacing:-.04em; line-height:1.1; margin:2px 0 4px}
+.card .label{color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.09em}
+.card.gold{border-color:rgba(224,164,58,.34); background:linear-gradient(180deg,rgba(224,164,58,.10),rgba(255,255,255,.02))}
+.card.teal{border-color:rgba(45,212,191,.30); background:linear-gradient(180deg,rgba(45,212,191,.09),rgba(255,255,255,.02))}
+.card.coral{border-color:rgba(248,113,113,.30); background:linear-gradient(180deg,rgba(248,113,113,.09),rgba(255,255,255,.02))}
+.callout{padding:18px 20px; border-radius:16px; border:1px solid rgba(224,164,58,.34); background:rgba(224,164,58,.08); color:#f8e7c1}
+.callout strong{color:#fff}
+.quiet{color:var(--muted)}
+.small{font-size:.86rem}
+.tiny{font-size:.76rem}
+
+/* Charts on light "paper" cards */
+.chart-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.chart-grid .wide{grid-column:1/-1}
+figure.chart-figure{margin:0; padding:16px; border-radius:18px; background:var(--paper); color:var(--paper-ink); border:1px solid rgba(255,255,255,.12); box-shadow:0 18px 40px rgba(0,0,0,.18)}
+figure.chart-figure svg{width:100%; height:auto; display:block}
+figure.chart-figure figcaption{margin-top:10px; color:var(--paper-muted); font-size:.82rem; line-height:1.5}
+figure.chart-figure figcaption strong{color:var(--paper-ink)}
+
+/* Tables */
+.table-wrap{overflow:auto; border-radius:16px; border:1px solid var(--line); background:rgba(0,0,0,.18)}
+table{width:100%; border-collapse:collapse; font-size:.87rem; min-width:620px}
+caption{text-align:left; padding:14px 16px 0; color:var(--muted); font-size:.82rem}
+th,td{padding:11px 14px; text-align:right; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); background:rgba(255,255,255,.03); position:sticky; top:0}
+tr:last-child td{border-bottom:0}
+td.neg{color:#fca5a5}
+td.pos{color:#5eead4}
+.table-note{color:var(--muted); font-size:.8rem; margin:10px 0 0}
+
+/* Claims */
+.claim{border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); padding:0 16px; margin:10px 0}
+.claim summary{cursor:pointer; padding:14px 0; font-weight:800; list-style:none}
+.claim summary::-webkit-details-marker{display:none}
+.claim summary:before{content:"＋"; color:var(--gold2); margin-right:10px; font-weight:900}
+.claim[open] summary:before{content:"−"}
+.claim .evidence{padding:0 0 16px; color:var(--muted); font-size:.92rem}
+.claim .evidence b{color:var(--ink)}
+
+/* Explorer */
+.explorer{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.control{display:grid; gap:8px; margin:14px 0 18px}
+.control label{font-weight:800; font-size:.9rem}
+.control input[type=range]{width:100%; accent-color:var(--gold)}
+.control select{width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--ink)}
+.range-labels{display:flex; justify-content:space-between; color:var(--muted); font-size:.74rem}
+.cost-readout{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:12px 0}
+.cost-readout div{padding:12px; border-radius:12px; background:rgba(0,0,0,.22); border:1px solid var(--line)}
+.cost-readout b{display:block; font-size:1.2rem}
+.cost-readout span{color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.07em}
+.bars{display:grid; gap:9px; margin-top:14px}
+.bar-row{display:grid; grid-template-columns:56px 1fr 74px; align-items:center; gap:10px; font-size:.8rem}
+.bar-track{height:12px; border-radius:999px; background:rgba(255,255,255,.07); overflow:hidden}
+.bar-fill{height:100%; border-radius:999px; background:linear-gradient(90deg,var(--coral),#b91c1c)}
+.bar-row.active .bar-track{box-shadow:0 0 0 1px var(--gold2)}
+.bar-row.active .bar-fill{background:linear-gradient(90deg,var(--gold2),var(--gold))}
+
+/* Timeline / steps */
+.steps{display:grid; gap:12px}
+.step{display:grid; grid-template-columns:38px 1fr; gap:14px; align-items:start; padding:14px; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,.03)}
+.step .num{width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:rgba(224,164,58,.16); color:var(--gold2); font-weight:900}
+.step p{margin:2px 0 0; color:var(--muted); font-size:.9rem}
+
+/* Quiz */
+.quiz-shell{display:grid; grid-template-columns:.9fr 1.1fr; gap:18px; align-items:start}
+.quiz-meta{padding:20px; border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.03)}
+.quiz-meta h3{margin-top:0}
+.quiz-meta ul{padding-left:18px; color:var(--muted); font-size:.9rem}
+.quiz-card{padding:22px; border-radius:20px; border:1px solid rgba(224,164,58,.30); background:linear-gradient(180deg,rgba(224,164,58,.08),rgba(255,255,255,.02)); box-shadow:var(--shadow)}
+.quiz-top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px}
+.level-tag{font-size:.7rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:var(--gold2); border:1px solid rgba(224,164,58,.35); background:rgba(224,164,58,.10); padding:5px 9px; border-radius:999px}
+.progress{height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin:10px 0 18px}
+.progress > span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--gold2),var(--teal)); transition:width .35s ease}
+fieldset{border:0; padding:0; margin:0; min-width:0}
+legend{font-size:1.12rem; font-weight:850; line-height:1.35; padding:0; margin-bottom:14px}
+.options{display:grid; gap:9px}
+.option{display:flex; gap:11px; align-items:flex-start; padding:12px 13px; border-radius:12px; border:1px solid var(--line); background:rgba(0,0,0,.20); cursor:pointer; transition:border-color .16s ease, background .16s ease}
+.option:hover{border-color:rgba(224,164,58,.45); background:rgba(224,164,58,.06)}
+.option input{margin-top:4px; accent-color:var(--gold)}
+.option span{font-size:.92rem}
+.option.correct{border-color:rgba(45,212,191,.55); background:rgba(45,212,191,.08)}
+.option.wrong{border-color:rgba(248,113,113,.55); background:rgba(248,113,113,.08)}
+.quiz-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.quiz-actions .btn{padding:11px 16px}
+.feedback{margin-top:14px; padding:13px 15px; border-radius:12px; font-size:.9rem; border:1px solid transparent; min-height:50px}
+.feedback.correct{border-color:rgba(45,212,191,.45); background:rgba(45,212,191,.09); color:#c7fff7}
+.feedback.wrong{border-color:rgba(248,113,113,.45); background:rgba(248,113,113,.09); color:#ffd1d1}
+.feedback.neutral{color:var(--muted); background:rgba(255,255,255,.03); border-color:var(--line)}
+.result{display:none}
+.result.show{display:block}
+.result .score{font-size:3rem; font-weight:900; letter-spacing:-.05em; line-height:1; margin:8px 0}
+.tier{display:inline-block; margin:6px 0 10px; padding:6px 11px; border-radius:999px; background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.35); color:#a7f3d0; font-weight:900; font-size:.78rem; letter-spacing:.06em; text-transform:uppercase}
+
+/* Business / deliverables */
+.usecase{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+.usecase .card{padding:16px}
+.usecase .card p{margin:6px 0 0; color:var(--muted); font-size:.9rem}
+.checklist{list-style:none; padding:0; margin:0; display:grid; gap:8px}
+.checklist li{padding-left:28px; position:relative; color:var(--muted); font-size:.92rem}
+.checklist li:before{content:"✓"; position:absolute; left:0; top:0; color:var(--teal); font-weight:900}
+
+/* Code */
+pre{overflow:auto; padding:16px; border-radius:14px; background:#050912; border:1px solid var(--line); font-size:.82rem; line-height:1.6; color:#d7e2f3}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.tree{white-space:pre; font-size:.78rem; line-height:1.65}
+
+/* Footer */
+footer{padding:48px 0 64px; border-top:1px solid var(--line); color:var(--muted); font-size:.86rem}
+.footer-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:24px; align-items:start}
+.footer-brand{display:flex; align-items:center; gap:10px; color:var(--ink); font-weight:900; margin-bottom:8px}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--gold2)}
+.backtop{display:inline-flex; align-items:center; gap:8px; margin-top:12px}
+
+/* Reveal */
+.reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* Responsive */
+@media (max-width: 980px){
+  .hero-grid,.explorer,.quiz-shell,.grid-2,.chart-grid,.footer-grid{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .grid-4{grid-template-columns:1fr 1fr}
+  .chart-grid .wide{grid-column:auto}
+  .nav{flex-wrap:wrap}
+  .nav-links{order:3; flex-basis:100%; flex-wrap:nowrap; gap:10px; overflow-x:auto; padding-bottom:2px; font-size:.74rem; white-space:nowrap; scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+}
+@media (max-width: 620px){
+  .wrap{width:min(100% - 26px, 1180px)}
+  section{padding:54px 0}
+  .hero{padding-top:42px}
+  .grid-3,.grid-4,.usecase{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .cost-readout{grid-template-columns:1fr}
+  table{min-width:540px}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*:before,*:after{animation:none!important; transition:none!important}
+  .reveal{opacity:1; transform:none}
+}
+@media print{
+  header.site,.cta-row,.quiz-shell,.nav-cta,.backtop{display:none!important}
+  body{background:#fff; color:#111}
+  section{border-color:#ddd; padding:24px 0}
+  .card,figure.chart-figure,.table-wrap{border-color:#ddd; box-shadow:none; background:#fff; color:#111}
+  .grad{color:#111; background:none; -webkit-text-fill-color:#111}
+  .muted,.lead,.quiet,.small{color:#444}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="mark">KL</span> KeyLevel Lab</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#verdict">Verdict</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#explore">Explore</a>
+      <a href="#learn">Learn</a>
+      <a href="#business">Business</a>
+      <a href="#reproduce">Reproduce</a>
+    </nav>
+    <a class="nav-cta" href="#learn">Take the quiz</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Independent research · 2012–2025 · {{BARS}} bars</span>
+      <h1>Do multi-timeframe <span class="grad">key levels</span> actually work?</h1>
+      <p class="lead">A pre-registered test on eight liquid instruments, <strong>{{TOTAL_TRADES}} trades</strong>, and a sealed 2023–2025 holdout. The answer is clear — and the method is the valuable part.</p>
+      <div class="verdict-pill"><span class="dot" aria-hidden="true"></span> Verdict: null result</div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#evidence">Read the evidence</a>
+        <a class="btn btn-ghost" href="#learn">Take the 12-question course</a>
+      </div>
+      <p class="micro">No story, no cherry-picked chart, no paid signal. Every number on this page is produced by the pipeline and stored in the repository. <strong>Not financial advice.</strong></p>
+      <div class="pill-row" aria-label="Research snapshot">
+        <span class="pill">8 instruments</span>
+        <span class="pill">{{GRID_VARIANTS}} pre-registered variants</span>
+        <span class="pill">3 samples + 2026 shadow</span>
+        <span class="pill">{{DUP}} duplicate timestamps</span>
+      </div>
+    </div>
+
+    <aside class="hero-card" aria-label="The verdict in four numbers">
+      <div class="verdict-big">NULL</div>
+      <p class="verdict-sub">The pre-registered success test failed on the sealed holdout.</p>
+      <div class="kpis">
+        <div class="kpi"><b>{{HOLD_TRADES}}</b><span>Holdout trades</span></div>
+        <div class="kpi neg"><b>{{HOLD_NET_R}}R</b><span>Mean net return</span></div>
+        <div class="kpi neg"><b>{{HOLD_SHARPE}}</b><span>Net Sharpe ratio</span></div>
+        <div class="kpi neg"><b>{{HOLD_DD}}</b><span>Maximum drawdown</span></div>
+      </div>
+      <p class="hero-note">Development: {{DEV_NET_R}}R · Validation: {{VAL_NET_R}}R · Holdout: {{HOLD_NET_R}}R. The sign never reverses.</p>
+    </aside>
+  </div>
+</section>
+
+<section id="verdict">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The claim</span>
+      <h2>A popular idea, tested without moving the goalposts</h2>
+      <p class="lead-sm">The method says that when pivots from monthly, weekly, and daily charts cluster into a “key level,” price will react there. Add a 4-hour trend filter and a 15-minute confirmation, and the win rate is said to be very high. We wrote the rules down before opening the answer, froze the code, and charged real costs.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <div class="claim">
+          <details>
+            <summary>“Key levels are high-probability reversal points.”</summary>
+            <div class="evidence">The strict hold rate was <b>{{HOLD_RATE}}</b>. Price reached +1R before −1R in <b>{{HIT1}}</b> of executed signals. That is close to a coin flip, not a high-probability reversal.</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“Multi-timeframe confluence gives a 90% win rate.”</summary>
+            <div class="evidence">The sealed holdout win rate was <b>{{HOLD_WIN}}</b> and the profit factor was <b>{{HOLD_PF}}</b>. The 90% claim is not supported.</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“The right settings make it work.”</summary>
+            <div class="evidence"><b>{{GRID_VARIANTS}} of {{GRID_VARIANTS}}</b> pre-registered variants had a negative net Sharpe. The least-bad variant was still <b>{{GRID_BEST}}</b>.</div>
+          </details>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="claim">
+          <details>
+            <summary>“Costs are a detail.”</summary>
+            <div class="evidence">At zero cost the holdout still lost <b>−0.028R</b> per trade. At the modelled cost it lost <b>{{HOLD_NET_R}}R</b>. At three times the modelled cost it lost <b>−0.442R</b>. The sign never changes.</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“The backtest proves it.”</summary>
+            <div class="evidence">The deflated Sharpe ratio is <b>{{DSR_BASE}}</b> after <b>{{N_TRIALS}}</b> trials. The Reality Check and SPA p-values are <b>{{RC_P}}</b> and <b>{{SPA_P}}</b>. The random-entry placebo is not rejected (p = <b>{{RE_P}}</b>).</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“It beats the market.”</summary>
+            <div class="evidence">The holdout net Sharpe was <b>{{HOLD_SHARPE}}</b>. Buy-and-hold was <b>+1.92</b> on the same window and cost model. The key-level rule was the worst of the five strategies tested.</div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout reveal" style="margin-top:22px">
+      <strong>Why this is useful even though it is negative.</strong> A negative result that is this well documented protects capital. It also leaves behind a reusable filter: pre-registration, a sealed holdout, realistic costs, benchmarks, placebos, and multiple-testing controls. Use it on the next idea before you fund it.
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The evidence</span>
+      <h2>One screen, every number that matters</h2>
+      <p class="lead-sm">Development is where the rules were built. Validation is the first check. The sealed holdout is the honest test. The result is negative in all three, and the controls agree.</p>
+    </div>
+
+    <div class="chart-grid">
+      <div class="wide reveal">{{SVG_EQUITY}}</div>
+      <div class="reveal">{{SVG_GRID}}</div>
+      <div class="reveal">{{SVG_COST}}</div>
+      <div class="reveal">{{SVG_BENCH}}</div>
+      <div class="reveal">{{SVG_HOLD}}</div>
+      <div class="wide reveal">{{SVG_HIST}}</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="reveal">
+        <h3>Headline results</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>Development, validation, and sealed holdout, net of modelled costs.</caption>
+            <thead><tr><th>Metric</th><th>Development</th><th>Validation</th><th>Sealed holdout</th></tr></thead>
+            <tbody id="headlineBody"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The pre-registered success criterion required a positive net mean R and a positive net Sharpe on the sealed holdout. It failed both.</p>
+      </div>
+      <div class="reveal">
+        <h3>Selection and significance</h3>
+        <div class="grid-2" style="gap:10px">
+          <div class="card coral"><span class="label">Deflated Sharpe, base</span><div class="big">{{DSR_BASE}}</div><p class="tiny quiet">No evidence after {{N_TRIALS}} trials.</p></div>
+          <div class="card coral"><span class="label">Deflated Sharpe, winner</span><div class="big">{{DSR_WIN}}</div><p class="tiny quiet">The best variant is not special.</p></div>
+          <div class="card"><span class="label">PBO</span><div class="big">{{PBO}}</div><p class="tiny quiet">{{PBO_SPLITS}} splits. Modest only because the whole set loses.</p></div>
+          <div class="card"><span class="label">Reality Check / SPA</span><div class="big">{{RC_P}}</div><p class="tiny quiet">Cannot reject the benchmark set.</p></div>
+          <div class="card"><span class="label">Bootstrap mean R</span><div class="big">[{{BOOT_MEAN_LO}}, {{BOOT_MEAN_HI}}]</div><p class="tiny quiet">{{BOOT_N}} resamples, block {{BOOT_BLOCK}}.</p></div>
+          <div class="card"><span class="label">Bootstrap Sharpe</span><div class="big">[{{BOOT_SHARPE_LO}}, {{BOOT_SHARPE_HI}}]</div><p class="tiny quiet">Entirely below zero.</p></div>
+        </div>
+        <p class="table-note" style="margin-top:12px">Alpha versus an equal-weight basket: <strong>{{ALPHA}}</strong> a year (p = {{ALPHA_P}}). Random-entry placebo: p = {{RE_P}}. Random-level placebo: {{RL_DISPLAY}}.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="reveal">
+        <h3>Benchmarks, same window, same costs</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>Holdout Sharpe ratios. A higher number is better.</caption>
+            <thead><tr><th>Strategy</th><th>Annualised return</th><th>Net Sharpe</th><th>Max drawdown</th></tr></thead>
+            <tbody id="benchBody"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The key-level rule is the worst of the five. A strategy does not have to beat every benchmark, but it should not be last after a decade of development.</p>
+      </div>
+      <div class="reveal">
+        <h3>Level reaction audit</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>Executed development signals, forward 96 bars.</caption>
+            <thead><tr><th>Measure</th><th>Share</th><th>Plain reading</th></tr></thead>
+            <tbody>
+              <tr><td>Strict hold</td><td class="neg">{{HOLD_RATE}}</td><td>No close through the level</td></tr>
+              <tr><td>+1R before −1R</td><td>{{HIT1}}</td><td>Slightly worse than a coin flip</td></tr>
+              <tr><td>+2R before −1R</td><td>{{HIT2}}</td><td>About one in three</td></tr>
+              <tr><td>+3R before −1R</td><td>{{HIT3}}</td><td>About one in five</td></tr>
+              <tr><td>Mean MFE</td><td>{{MFE}}R</td><td>Average best excursion</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">The level is not a wall. The mechanism the strategy depends on is not present in the executed signals.</p>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:22px">
+      <h3>Holdout by instrument</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Eight liquid instruments. The average is negative and the dispersion is not evidence of a hidden profitable subset.</caption>
+          <thead><tr><th>Symbol</th><th>Holdout trades</th><th>Mean net R</th><th>Win rate</th></tr></thead>
+          <tbody id="symbolBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:22px">
+      <div class="card teal reveal"><span class="label">Data checked</span><div class="big">{{BARS}}</div><p class="tiny quiet">bars across {{SERIES}} series.</p></div>
+      <div class="card teal reveal"><span class="label">Duplicate timestamps</span><div class="big">{{DUP}}</div><p class="tiny quiet">OHLC violations: {{VIOL}}. Non-positive prices: {{NONPOS}}.</p></div>
+      <div class="card teal reveal"><span class="label">Cross-vendor correlation</span><div class="big">{{CROSS_MIN}}–{{CROSS_MAX}}</div><p class="tiny quiet">Weekly returns versus an independent daily source.</p></div>
+    </div>
+
+    <div class="reveal" style="margin-top:22px">
+      <h3>Data integrity by timeframe</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Every processed series is checked for duplicates, impossible OHLC bars, and non-positive prices.</caption>
+          <thead><tr><th>Timeframe</th><th>Series</th><th>Bars</th><th>Duplicate timestamps</th><th>OHLC violations</th><th>Non-positive prices</th></tr></thead>
+          <tbody id="integrityBody"></tbody>
+        </table>
+      </div>
+      <p class="table-note">The largest absolute 15-minute log return was {{MAX15}}, consistent with a real intraday move rather than a corrupted bar. The intrabar ambiguity audit found 8 ambiguous trades out of {{DEV_TRADES}} development trades (0.1%).</p>
+    </div>
+
+    <div class="reveal" style="margin-top:22px">
+      <h3>2026 live shadow</h3>
+      <div class="grid-4">
+        <div class="card"><span class="label">Trades</span><div class="big">{{LIVE_TRADES}}</div><p class="tiny quiet">Descriptive only.</p></div>
+        <div class="card coral"><span class="label">Mean net R</span><div class="big">{{LIVE_R}}</div><p class="tiny quiet">Not a significance test.</p></div>
+        <div class="card"><span class="label">Win rate</span><div class="big">{{LIVE_WIN}}</div><p class="tiny quiet">Same direction as history.</p></div>
+        <div class="card"><span class="label">Profit factor</span><div class="big">{{LIVE_PF}}</div><p class="tiny quiet">Below 1.0.</p></div>
+      </div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table>
+          <caption>Live shadow on the most recent 15-minute window. No live capital was used.</caption>
+          <thead><tr><th>Symbol</th><th>Live trades</th><th>Mean net R</th><th>Win rate</th></tr></thead>
+          <tbody id="liveBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="explore">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Explore</span>
+      <h2>Change the assumptions yourself</h2>
+      <p class="lead-sm">The result is not a single number that you have to trust. Move the cost slider and filter the grid. Every value comes from the stored results.</p>
+    </div>
+
+    <div class="explorer">
+      <div class="card reveal">
+        <h3>Cost explorer</h3>
+        <p class="small quiet">The pre-registered model charges half-spread plus slippage on both sides. Drag the cost multiplier to see how the holdout result responds.</p>
+        <div class="control">
+          <label for="costRange">Cost multiplier</label>
+          <input id="costRange" type="range" min="0" max="3" step="1" value="1" aria-describedby="costHelp">
+          <div class="range-labels" aria-hidden="true"><span>0×</span><span>1×</span><span>2×</span><span>3×</span></div>
+          <p id="costHelp" class="tiny quiet">1× is the pre-registered assumption. 0× is a stress test, not a realistic scenario.</p>
+        </div>
+        <div class="cost-readout" aria-live="polite">
+          <div><b id="costTrades">—</b><span>Trades</span></div>
+          <div><b id="costR">—</b><span>Mean net R</span></div>
+          <div><b id="costSharpe">—</b><span>Net Sharpe</span></div>
+        </div>
+        <div class="bars" id="costBars" aria-hidden="true"></div>
+        <p class="tiny quiet" style="margin-top:12px">At 0× the strategy still loses. Costs make the loss larger; they are not the only cause.</p>
+      </div>
+
+      <div class="card reveal">
+        <h3>Grid explorer</h3>
+        <p class="small quiet">All {{GRID_VARIANTS}} combinations were pre-registered. Filter by the level-cluster width. Every row is negative.</p>
+        <div class="control">
+          <label for="clusterFilter">Cluster width (× ATR)</label>
+          <select id="clusterFilter">
+            <option value="all">All widths</option>
+            <option value="0.25">0.25</option>
+            <option value="0.5">0.50</option>
+            <option value="1">1.00</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="max-height:420px">
+          <table>
+            <caption id="gridCaption">All pre-registered variants, sorted by net Sharpe.</caption>
+            <thead><tr><th>ATR / touches / confirms</th><th>Trades</th><th>Mean net R</th><th>Net Sharpe</th></tr></thead>
+            <tbody id="gridBody"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The least-bad variant is still {{GRID_BEST}}. There is no profitable corner of the grid.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="anatomy">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">What was tested</span>
+      <h2>The rules, in plain English</h2>
+      <p class="lead-sm">This is one explicit, mechanical interpretation of a discretionary idea. The full specification is in the pre-registration document.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <div class="steps">
+          <div class="step"><div class="num">1</div><div><h3>Find the levels</h3><p>Monthly, weekly, and daily pivots are clustered into levels. Pivots within 0.50 × ATR(D1) become one level. A level needs at least two touches.</p></div></div>
+          <div class="step"><div class="num">2</div><div><h3>Filter the direction</h3><p>The 4-hour trend is read from the last two confirmed swing highs and lows. Only trades in the trend direction are allowed.</p></div></div>
+          <div class="step"><div class="num">3</div><div><h3>Wait for the trigger</h3><p>On the 15-minute chart, price must touch the level and close back through it. Two confirmation closes and a directional candle are required. The entry is the next bar open.</p></div></div>
+          <div class="step"><div class="num">4</div><div><h3>Manage the risk</h3><p>The stop sits just beyond the level or the 5-bar extreme, capped at 4 × ATR. The target is the next opposite level, default 2R, capped at 5R. The time stop is 96 bars.</p></div></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="card">
+          <h3>The experiment in numbers</h3>
+          <div class="table-wrap" style="margin-top:10px">
+            <table>
+              <caption>Pre-registered design.</caption>
+              <tbody>
+                <tr><td>Instruments</td><td>8 liquid markets</td></tr>
+                <tr><td>Development</td><td>2012–2019</td></tr>
+                <tr><td>Validation</td><td>2020–2022</td></tr>
+                <tr><td>Sealed holdout</td><td>2023–2025</td></tr>
+                <tr><td>Risk per trade</td><td>0.5% of equity</td></tr>
+                <tr><td>Costs</td><td>Half-spread + slippage, both sides</td></tr>
+                <tr><td>Grid</td><td>{{GRID_VARIANTS}} combinations</td></tr>
+                <tr><td>Ambiguity rule</td><td>Stop assumed first if stop and target share a bar</td></tr>
+                <tr><td>Freeze</td><td><code>{{FREEZE_SHORT}}</code> ({{FREEZE_FILES}} files)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="tiny quiet" style="margin-top:12px">The holdout was opened once. The guard now refuses to re-open it. Post-holdout edits are documented in the deviation log.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="learn">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Learn</span>
+      <h2>🌱 Beginner guide — read this and you are a professional</h2>
+      <p class="lead-sm">Twelve questions, instant explanations, and a score at the end. Start anywhere. The quiz teaches the controls that separate a real test from a sales pitch. <strong>You will know more than most interview candidates.</strong></p>
+    </div>
+
+    <div class="quiz-shell">
+      <aside class="quiz-meta reveal">
+        <h3>How the course works</h3>
+        <ul>
+          <li><strong>Beginner:</strong> R, levels, costs, and holdouts.</li>
+          <li><strong>Analyst:</strong> placebos, benchmarks, and selection.</li>
+          <li><strong>Professional:</strong> deflated Sharpe, PBO, and a due-diligence sequence.</li>
+        </ul>
+        <p class="small quiet">Each answer explains the reasoning, not just the correct letter. You can restart at any time. The quiz is keyboard accessible and remembers nothing between visits.</p>
+        <div class="callout" style="margin-top:14px"><strong>No jargon left behind.</strong> If a term is unfamiliar, the glossary in the README has a plain-language definition.</div>
+        <div class="pill-row">
+          <span class="pill">12 questions</span>
+          <span class="pill">3 levels</span>
+          <span class="pill">Instant feedback</span>
+        </div>
+      </aside>
+
+      <div class="quiz-card reveal">
+        <div class="quiz-top">
+          <span class="level-tag" id="quizLevel">Beginner</span>
+          <span class="tiny quiet" id="quizProgressText">Question 1 of 12</span>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" id="quizProgress"><span id="quizProgressBar"></span></div>
+
+        <form id="quizForm" novalidate>
+          <fieldset id="quizFieldset">
+            <legend id="quizLegend">Loading question…</legend>
+            <div class="options" id="quizOptions"></div>
+          </fieldset>
+          <div class="quiz-actions">
+            <button class="btn btn-primary" type="submit" id="checkBtn">Check answer</button>
+            <button class="btn btn-ghost" type="button" id="nextBtn" hidden>Next question →</button>
+            <button class="btn btn-ghost" type="button" id="restartBtn" hidden>Restart</button>
+          </div>
+          <div class="feedback neutral" id="quizFeedback" role="status" aria-live="polite">Choose an answer, then check it.</div>
+        </form>
+
+        <div class="result" id="quizResult" role="status" aria-live="polite">
+          <span class="tier" id="resultTier">Result</span>
+          <div class="score" id="resultScore">0 / 12</div>
+          <p id="resultText" class="small quiet"></p>
+          <p class="small" id="resultPhrase"><strong>You will know more than most interview candidates.</strong></p>
+          <button class="btn btn-primary" type="button" id="restartBtn2">Take it again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="business">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Business</span>
+      <h2>Who uses this, and what they get</h2>
+      <p class="lead-sm">The research is a <strong>negative result with positive utility</strong>. It helps a business avoid a bad allocation and gives a team a repeatable way to evaluate the next idea.</p>
+    </div>
+
+    <div class="usecase">
+      <div class="card reveal"><h3>Investment committee / allocator</h3><p>An evidence pack for a strategy pitch: sealed holdout, realistic costs, benchmarks, placebos, and multiple-testing controls. Approve or reject with evidence instead of a story.</p></div>
+      <div class="card reveal"><h3>Prop firm / broker</h3><p>A cost-realistic case study that shows why most retail strategies fail. Use it to educate clients, reduce churn, and set honest expectations.</p></div>
+      <div class="card reveal"><h3>Quant researcher</h3><p>A reusable engine, pre-registration template, and inference suite. Start the next study from a tested baseline instead of a blank page.</p></div>
+      <div class="card reveal"><h3>University lecturer / student</h3><p>A complete teaching case with data, code, tests, and a paper. Teach backtesting, overfitting, and reproducibility with a real example.</p></div>
+      <div class="card reveal"><h3>Data vendor</h3><p>Integrity checks, cross-vendor validation, and a manifest. Demonstrate data quality with a public case study.</p></div>
+      <div class="card reveal"><h3>Builder / founder</h3><p>A forkable research template with Docker and tests. Ship a credible research page for your own idea.</p></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="card reveal">
+        <h3>What you get</h3>
+        <ul class="checklist">
+          <li>Pre-registered protocol and deviation log</li>
+          <li>Deterministic strategy engine and data pipeline</li>
+          <li>Development, validation, and sealed holdout outputs</li>
+          <li>18-point parameter grid and ablations</li>
+          <li>Benchmarks, placebos, DSR, PBO, RC, SPA, BH, and bootstrap</li>
+          <li>Data-integrity and cross-vendor validation</li>
+          <li>Interactive report and 12-question course</li>
+          <li>11-page paper, figures, and reproducible commands</li>
+        </ul>
+      </div>
+      <div class="card gold reveal">
+        <h3>How to engage</h3>
+        <p class="small">The repository is available for evaluation. Commercial use, custom replication, integration support, and a private briefing are available under a written licence.</p>
+        <p class="small"><strong>Open an issue with the subject “Commercial licence”</strong> and describe the use case. You will get a scoped proposal, not a sales call.</p>
+        <p class="tiny quiet" style="margin-top:12px">Not financial advice. Past performance does not guarantee future results.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="reproduce">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Reproduce</span>
+      <h2>Run it, inspect it, challenge it</h2>
+      <p class="lead-sm">The pipeline is one command per stage. The tests are fast. The holdout guard is deliberate.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <h3>Quick start</h3>
+        <pre><code>git clone &lt;your-repository-url&gt; keylevel-mtf-research
+cd keylevel-mtf-research
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m pytest -q</code></pre>
+        <p class="table-note">Expected: <strong>6 tests pass</strong>. The tests cover causality, minimum touches, stop-first accounting, gap handling, session labels, and inference smoke tests.</p>
+        <h3 style="margin-top:20px">Full pipeline</h3>
+        <pre><code>make setup
+make download
+make build
+make test
+make development
+make validation
+make freeze
+make holdout
+make audit
+make live
+make report
+make pdf</code></pre>
+      </div>
+      <div class="reveal">
+        <h3>Repository map</h3>
+        <pre class="tree"><code>keylevel-mtf-research/
+├── README.md            public overview
+├── RESEARCH.md          long-form paper
+├── preview.html         this page
+├── paper/main.pdf       11-page manuscript
+├── preregistration/     protocol + deviations
+├── config/              parameters + instruments
+├── src/klab/            engine + statistics
+├── results/             trades, grid, audit, live
+├── tests/               6 tests
+├── assets/              screenshots + media
+├── Makefile             one command per stage
+└── CODE_FREEZE.json     27-file hash</code></pre>
+        <div class="callout" style="margin-top:14px"><strong>Holdout guard.</strong> <code>make holdout</code> refuses to run in the current tree because the holdout has already been opened. The opened outputs are retained under <code>results/holdout/</code>. This is a feature, not a bug.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="reveal">
+        <h3>Publish this page</h3>
+        <ol class="small quiet" style="padding-left:20px">
+          <li>Push the repository to GitHub as a public repository.</li>
+          <li>Open <strong>Settings → Pages</strong>.</li>
+          <li>Under <strong>Build and deployment → Source</strong>, choose <strong>Deploy from a branch</strong>.</li>
+          <li>Choose branch <strong>main</strong> and folder <strong>/ (root)</strong>. Save.</li>
+          <li>The site appears at <code>https://&lt;user&gt;.github.io/&lt;repo&gt;/</code>.</li>
+        </ol>
+        <p class="table-note"><code>.nojekyll</code> and <code>index.html</code> are already included. No build step is required.</p>
+      </div>
+      <div class="reveal">
+        <h3>The method you can reuse</h3>
+        <ul class="checklist">
+          <li>Write the rules and success criteria before the test.</li>
+          <li>Freeze the code and hash it.</li>
+          <li>Keep a sealed holdout and open it once.</li>
+          <li>Charge realistic costs on both sides.</li>
+          <li>Compare with simple benchmarks.</li>
+          <li>Compare with random entries and random levels.</li>
+          <li>Correct for the number of trials.</li>
+          <li>Publish the negative result, not just the winner.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><span class="mark">KL</span> KeyLevel Lab</div>
+      <p class="small">A pre-registered replication and null result for multi-timeframe key-level trading. Built from verified results; every number is generated by the pipeline.</p>
+      <p class="tiny">Generated {{GENERATED_DATE}} · Code freeze <code>{{FREEZE_SHORT}}</code> · {{FREEZE_FILES}} frozen files · {{BARS}} bars · {{TOTAL_TRADES}} trades.</p>
+      <p class="tiny">Not financial advice. Past performance does not guarantee future results.</p>
+      <a class="backtop" href="#top">↑ Back to top</a>
+    </div>
+    <div>
+      <p class="small"><strong>Read more</strong></p>
+      <p class="small"><a href="README.md">Public overview</a><br><a href="RESEARCH.md">Long-form report</a><br><a href="paper/main.pdf">Academic paper</a></p>
+      <p class="small"><strong>Licence</strong><br>Evaluation permitted. Commercial use requires a written licence. See <a href="LICENSE.md">LICENSE.md</a>.</p>
+    </div>
+  </div>
+</footer>
+
+<noscript>
+  <div class="wrap"><div class="callout" style="margin:20px 0">JavaScript is off. The charts and the headline verdict are still visible. Enable JavaScript for the cost explorer, the grid filter, and the 12-question course.</div></div>
+</noscript>
+
+<script>
+const DATA = {{DATA_JSON}};
+const $ = (id) => document.getElementById(id);
+
+const nf = (v, d = 2) => (v === null || v === undefined || !isFinite(v)) ? "—" : Number(v).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
+const pf = (v, d = 1) => (v === null || v === undefined || !isFinite(v)) ? "—" : (100 * Number(v)).toFixed(d) + "%";
+const sf = (v, d = 3) => (v === null || v === undefined || !isFinite(v)) ? "—" : (Number(v) >= 0 ? "+" : "") + Number(v).toFixed(d);
+const negClass = (v) => Number(v) < 0 ? "neg" : "pos";
+
+function renderTable(bodyId, headers, rows) {
+  const body = $(bodyId);
+  if (!body) return;
+  body.replaceChildren();
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    row.forEach((cell, i) => {
+      const td = document.createElement("td");
+      td.textContent = String(cell);
+      if (i > 0 && /^[+-]?[0-9]/.test(String(cell)) && String(cell).includes("-")) td.className = "neg";
+      if (i > 0 && String(cell).startsWith("+") && !String(cell).startsWith("+-")) td.className = "pos";
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function renderHeadline() {
+  const d = DATA.stages.development, v = DATA.stages.validation, h = DATA.stages.holdout;
+  const rows = [
+    ["Trades", d.n_trades.toLocaleString(), v.n_trades.toLocaleString(), h.n_trades.toLocaleString()],
+    ["Mean gross R", sf(d.gross_r), sf(v.gross_r), sf(h.gross_r)],
+    ["Mean net R", sf(d.avg_r), sf(v.avg_r), sf(h.avg_r)],
+    ["Annualised net Sharpe", nf(d.sharpe), nf(v.sharpe), nf(h.sharpe)],
+    ["Maximum drawdown", pf(d.max_drawdown, 2), pf(v.max_drawdown, 2), pf(h.max_drawdown, 2)],
+    ["Win rate", pf(d.win_rate), pf(v.win_rate), pf(h.win_rate)],
+    ["Profit factor", nf(d.profit_factor), nf(v.profit_factor), nf(h.profit_factor)]
+  ];
+  renderTable("headlineBody", [], rows);
+}
+
+function renderBench() {
+  const rows = DATA.bench.map((r) => [r.label || r.variant.replace(/_/g, " "), pf(r.ann_return), nf(r.sharpe), pf(r.max_drawdown, 2)]);
+  const h = DATA.stages.holdout;
+  rows.push(["key levels (holdout)", pf(h.ann_return), nf(h.sharpe), pf(h.max_drawdown, 2)]);
+  const body = $("benchBody");
+  body.replaceChildren();
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    row.forEach((cell, i) => {
+      const td = document.createElement("td");
+      td.textContent = String(cell);
+      if (i === 2) td.className = Number(cell) < 0 ? "neg" : "pos";
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function renderSymbols() {
+  renderTable("symbolBody", [], DATA.hold_symbols.map((r) => [r.symbol, r.n_trades.toLocaleString(), sf(r.mean_r), pf(r.win_rate)]));
+}
+
+function renderLive() {
+  renderTable("liveBody", [], DATA.symbols.map((r) => [r.symbol, r.n_trades.toLocaleString(), sf(r.avg_r), pf(r.win_rate)]));
+}
+
+function renderIntegrity() {
+  renderTable("integrityBody", [], DATA.integrity.map((r) => [r.timeframe, r.series.toLocaleString(), r.rows.toLocaleString(), r.duplicate_ts.toLocaleString(), r.ohlc_violations.toLocaleString(), r.nonpositive.toLocaleString()]));
+}
+
+function renderGrid() {
+  const filter = $("clusterFilter").value;
+  const rows = DATA.grid.filter((r) => filter === "all" || Math.abs(r.cluster_atr - Number(filter)) < 1e-9);
+  $("gridCaption").textContent = filter === "all"
+    ? "All pre-registered variants, sorted by net Sharpe."
+    : "Cluster width " + Number(filter).toFixed(2) + " × ATR, sorted by net Sharpe.";
+  renderTable("gridBody", [], rows.map((r) => [r.cluster_atr.toFixed(2) + " / " + r.min_touches + " / " + r.confirmation_closes, r.n_trades.toLocaleString(), sf(r.avg_r), nf(r.sharpe)]));
+}
+
+function renderCostExplorer() {
+  const value = Number($("costRange").value);
+  const row = DATA.costs.find((r) => Math.abs(r.multiplier - value) < 1e-9) || DATA.costs[0];
+  $("costTrades").textContent = row.n_trades.toLocaleString();
+  $("costR").textContent = sf(row.avg_r);
+  $("costSharpe").textContent = nf(row.sharpe);
+  const max = Math.max.apply(null, DATA.costs.map((r) => Math.abs(r.avg_r))) || 1;
+  const bars = $("costBars");
+  bars.replaceChildren();
+  DATA.costs.forEach((r) => {
+    const line = document.createElement("div");
+    line.className = "bar-row" + (Math.abs(r.multiplier - value) < 1e-9 ? " active" : "");
+    const label = document.createElement("span");
+    label.textContent = r.multiplier.toFixed(0) + "×";
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = Math.max(2, Math.abs(r.avg_r) / max * 100) + "%";
+    track.appendChild(fill);
+    const val = document.createElement("span");
+    val.textContent = sf(r.avg_r);
+    line.appendChild(label); line.appendChild(track); line.appendChild(val);
+    bars.appendChild(line);
+  });
+}
+
+/* Quiz */
+const QUIZ = [
+  {level:"Beginner", q:"In this research, what does 1R represent?", options:["One dollar of profit","The amount risked on a trade","One year of returns","The first round of testing"], correct:1, why:"R normalises every trade by the risk taken. +2R means you made twice your risk; -1R means you lost the full risk."},
+  {level:"Beginner", q:"What is a sealed holdout?", options:["Data used to tune the strategy","Data never used during development, opened once","A second copy of the development data","A broker account"], correct:1, why:"A holdout is the closest thing in a backtest to a real out-of-sample test. Opening it once prevents repeated peeking."},
+  {level:"Beginner", q:"The holdout mean net R was -0.166. What does that mean?", options:["The strategy made 16.6% per trade","The strategy lost on average 0.166 times the risk per trade after costs","The strategy won 16.6% of trades","The strategy lost 16.6% of the account per year"], correct:1, why:"Mean net R is the average result per trade after costs, expressed in units of risk. Negative means the average trade lost money."},
+  {level:"Beginner", q:"Why do costs matter so much in this study?", options:["They are charged only on winning trades","They are tiny and can be ignored","They are charged on both sides of thousands of trades and can turn a small edge negative","They only affect crypto"], correct:2, why:"The model charges half-spread plus slippage on entry and exit. Small per-trade costs compound over thousands of trades."},
+  {level:"Beginner", q:"What was the pre-registered success criterion?", options:["A positive gross mean R only","A positive net mean R and a positive net Sharpe on the sealed holdout","A win rate above 50%","A drawdown below 10%"], correct:1, why:"The protocol required both a positive net mean R and a positive net Sharpe on the sealed holdout. The result failed both."},
+  {level:"Analyst", q:"The random-entry placebo had p = 0.718. What is the plain reading?", options:["The strategy is significantly better than random","The strategy is not statistically better than random entries with the same geometry","Random entries are illegal","The test was inconclusive because p > 0.05"], correct:1, why:"A high p-value means the observed result is not unusual under the placebo. The entry rule did not add measurable value over random entries."},
+  {level:"Analyst", q:"What does the probability of backtest overfitting (PBO) estimate?", options:["The chance the code has a bug","The chance the in-sample winner underperforms out of sample","The chance the data are fake","The chance the broker rejects an order"], correct:1, why:"PBO estimates how often the selected winner ranks poorly out of sample. Here it is modest only because the whole set loses."},
+  {level:"Analyst", q:"What does the deflated Sharpe ratio correct for?", options:["Inflation","The number of trials and non-normal returns","The bid-ask spread only","The time zone of the data"], correct:1, why:"A high Sharpe from a large search is less impressive than the same Sharpe from one pre-registered test. The deflated Sharpe adjusts for that."},
+  {level:"Analyst", q:"The strict hold rate was 15.5%. What does that mean?", options:["15.5% of trades made money","15.5% of executed signals saw no close through the level over the next 96 bars","15.5% of levels were monthly","15.5% of the data were missing"], correct:1, why:"The strict hold measure asks whether the level survived without a close through it. Only 15.5% did."},
+  {level:"Professional", q:"Which comparison is the strongest challenge to the claim that the entry rule is special?", options:["Comparing with buy-and-hold only","Comparing with random entries that use the same stop and target geometry","Comparing with a different broker","Comparing the first year with the last year"], correct:1, why:"The random-entry placebo holds the risk geometry fixed and randomises the entry. If the rule cannot beat it, the entry is not adding value."},
+  {level:"Professional", q:"Why is a negative result still valuable to a business?", options:["It guarantees future profits","It prevents capital from being allocated to a rule that does not work and provides a reusable test process","It proves all technical analysis is useless","It avoids the need for data"], correct:1, why:"The value is avoided loss plus a repeatable filter. The method can be applied to the next idea before money is committed."},
+  {level:"Professional", q:"You are given a new strategy with a high backtest Sharpe. What is the best due-diligence order?", options:["Trust the Sharpe, then check the code","Check the marketing, then run one backtest","Pre-register the rules, use a sealed holdout, charge realistic costs, compare with benchmarks and placebos, and correct for multiple trials","Optimise the settings until the Sharpe is highest"], correct:2, why:"That sequence controls the four biggest sources of false confidence: hindsight, cost blindness, weak comparisons, and selection bias."}
+];
+
+let qIndex = 0;
+let qScore = 0;
+let qAnswered = false;
+
+function renderQuestion() {
+  const q = QUIZ[qIndex];
+  qAnswered = false;
+  $("quizResult").classList.remove("show");
+  $("quizForm").style.display = "";
+  $("quizFieldset").style.display = "";
+  $("quizLevel").textContent = q.level;
+  $("quizProgressText").textContent = "Question " + (qIndex + 1) + " of " + QUIZ.length;
+  $("quizProgress").setAttribute("aria-valuenow", String(qIndex));
+  $("quizProgressBar").style.width = (qIndex / QUIZ.length * 100) + "%";
+  $("quizLegend").textContent = q.q;
+  $("quizLegend").tabIndex = -1;
+  const options = $("quizOptions");
+  options.replaceChildren();
+  q.options.forEach((text, i) => {
+    const label = document.createElement("label");
+    label.className = "option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "q" + qIndex;
+    input.value = String(i);
+    const span = document.createElement("span");
+    span.textContent = text;
+    label.appendChild(input);
+    label.appendChild(span);
+    options.appendChild(label);
+  });
+  $("checkBtn").hidden = false;
+  $("nextBtn").hidden = true;
+  $("restartBtn").hidden = true;
+  const feedback = $("quizFeedback");
+  feedback.className = "feedback neutral";
+  feedback.textContent = "Choose an answer, then check it.";
+  $("quizLegend").focus();
+}
+
+function checkAnswer() {
+  if (qAnswered) return;
+  const selected = document.querySelector('input[name="q' + qIndex + '"]:checked');
+  const feedback = $("quizFeedback");
+  if (!selected) {
+    feedback.className = "feedback neutral";
+    feedback.textContent = "Choose an answer first.";
+    return;
+  }
+  qAnswered = true;
+  const q = QUIZ[qIndex];
+  const chosen = Number(selected.value);
+  const labels = $("quizOptions").querySelectorAll("label");
+  labels.forEach((label, i) => {
+    label.classList.toggle("correct", i === q.correct);
+    label.classList.toggle("wrong", i === chosen && chosen !== q.correct);
+    const input = label.querySelector("input");
+    input.disabled = true;
+  });
+  if (chosen === q.correct) {
+    qScore += 1;
+    feedback.className = "feedback correct";
+    feedback.textContent = "Correct. " + q.why;
+  } else {
+    feedback.className = "feedback wrong";
+    feedback.textContent = "Not quite. " + q.why;
+  }
+  $("checkBtn").hidden = true;
+  $("nextBtn").hidden = false;
+  $("nextBtn").textContent = qIndex === QUIZ.length - 1 ? "See my score →" : "Next question →";
+  $("nextBtn").focus();
+}
+
+function nextQuestion() {
+  qIndex += 1;
+  if (qIndex >= QUIZ.length) {
+    showResult();
+    return;
+  }
+  renderQuestion();
+}
+
+function showResult() {
+  $("quizProgress").setAttribute("aria-valuenow", String(QUIZ.length));
+  $("quizProgressBar").style.width = "100%";
+  $("quizForm").style.display = "none";
+  const result = $("quizResult");
+  result.classList.add("show");
+  $("resultScore").textContent = qScore + " / " + QUIZ.length;
+  let tier = "Start here";
+  let text = "Read the beginner guide, then come back. The quiz is designed to teach, not to trick.";
+  if (qScore >= 10) { tier = "Research lead"; text = "You can challenge a strategy pitch and explain why the evidence does or does not support it."; }
+  else if (qScore >= 7) { tier = "Analyst"; text = "You understand the core controls. Review the evidence section to sharpen the details."; }
+  else if (qScore >= 4) { tier = "Foundation"; text = "You have the basics. Read the beginner guide and retake the quiz."; }
+  $("resultTier").textContent = tier;
+  $("resultText").textContent = text;
+  $("restartBtn2").focus();
+}
+
+function restartQuiz() {
+  qIndex = 0;
+  qScore = 0;
+  qAnswered = false;
+  renderQuestion();
+}
+
+$("quizForm").addEventListener("submit", (event) => { event.preventDefault(); checkAnswer(); });
+$("nextBtn").addEventListener("click", nextQuestion);
+$("restartBtn").addEventListener("click", restartQuiz);
+$("restartBtn2").addEventListener("click", restartQuiz);
+$("costRange").addEventListener("input", renderCostExplorer);
+$("clusterFilter").addEventListener("change", renderGrid);
+
+renderHeadline();
+renderBench();
+renderSymbols();
+renderLive();
+renderIntegrity();
+renderGrid();
+renderCostExplorer();
+renderQuestion();
+
+/* Reveal on scroll */
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (!reduce && "IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in");
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+} else {
+  document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+}
+</script>
+</body>
+</html>

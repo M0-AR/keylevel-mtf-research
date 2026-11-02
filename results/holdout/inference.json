@@ -1,0 +1,201 @@
+{
+  "alpha_beta_base": {
+    "alpha_ann": -0.5446224419876402,
+    "beta": 0.06309598201459747,
+    "p_alpha": 3.649452679072864e-07,
+    "t_alpha": -5.086388936883429
+  },
+  "alpha_beta_winner": {
+    "alpha_ann": -0.23926509062930157,
+    "beta": 0.043255439368708695,
+    "p_alpha": 0.011855566545239631,
+    "t_alpha": -2.51641448829376
+  },
+  "benchmarks": [
+    {
+      "ann_return": 0.11743145712702696,
+      "ann_vol": 0.0587508824920817,
+      "calmar": 2.0422923831995763,
+      "kurtosis": 15.513171703160008,
+      "max_drawdown": -0.05749982622128369,
+      "n_days": 783.0,
+      "sharpe": 1.9196118630423378,
+      "skew": 0.31021353038982097,
+      "sortino": 2.9158586875376153,
+      "split": "holdout",
+      "variant": "buy_and_hold"
+    },
+    {
+      "ann_return": -0.026886884874343875,
+      "ann_vol": 0.04131798732766153,
+      "calmar": -0.3069941057375337,
+      "kurtosis": 7.991683028000398,
+      "max_drawdown": -0.08758111107622035,
+      "n_days": 783.0,
+      "sharpe": -0.638940527572062,
+      "skew": -0.7658553785125327,
+      "sortino": -0.828828305864979,
+      "split": "holdout",
+      "variant": "trend_only"
+    },
+    {
+      "ann_return": 0.030808432753149262,
+      "ann_vol": 0.0631340421896593,
+      "calmar": 0.5899455240912539,
+      "kurtosis": 10.171920285657343,
+      "max_drawdown": -0.052222504443281026,
+      "n_days": 783.0,
+      "sharpe": 0.5121975782976281,
+      "skew": -0.3022534001208341,
+      "sortino": 0.7334737639564222,
+      "split": "holdout",
+      "variant": "sma_50_200"
+    },
+    {
+      "ann_return": -0.027797669691143723,
+      "ann_vol": 0.03917331045695448,
+      "calmar": -0.31325060733701104,
+      "kurtosis": 8.835057599588541,
+      "max_drawdown": -0.08873939599816183,
+      "n_days": 783.0,
+      "sharpe": -0.700025438019366,
+      "skew": -0.8345967097423571,
+      "sortino": -0.9033467471932308,
+      "split": "holdout",
+      "variant": "donchian_20"
+    }
+  ],
+  "dsr_base": {
+    "dsr": 1.1359967409993836e-23,
+    "kurtosis": 4.632807368780923,
+    "n": 783.0,
+    "n_trials": 28.0,
+    "skew": 0.5993881878193026,
+    "sr": -0.17568636184446615,
+    "sr0": 0.20349926163726104
+  },
+  "dsr_winner": {
+    "dsr": 4.174179238770619e-15,
+    "kurtosis": 4.869818457751087,
+    "n": 783.0,
+    "n_trials": 28.0,
+    "skew": 0.8499994264550159,
+    "sr": -0.08484209096672947,
+    "sr0": 0.20349926163726104
+  },
+  "n_trials": 28,
+  "pbo": {
+    "is_best_counts": {
+      "3": 1,
+      "4": 5,
+      "5": 85,
+      "10": 58,
+      "11": 8,
+      "13": 5,
+      "14": 11,
+      "16": 132,
+      "17": 619
+    },
+    "mean_logit": -1.7718433074171882,
+    "median_oos_rank": 2.0,
+    "n_obs": 2076,
+    "n_splits": 924,
+    "n_variants": 18,
+    "pbo": 0.10714285714285714
+  },
+  "per_instrument_bh": [
+    {
+      "p_one_sided": 0.9999872593895188,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "AUDUSD"
+    },
+    {
+      "p_one_sided": 0.9068546541867843,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "EURUSD"
+    },
+    {
+      "p_one_sided": 0.9979075355419138,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "GBPUSD"
+    },
+    {
+      "p_one_sided": 0.033314916484342316,
+      "q": 0.26651933187473853,
+      "reject": false,
+      "symbol": "NSXUSD"
+    },
+    {
+      "p_one_sided": 0.9548665617590173,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "SPXUSD"
+    },
+    {
+      "p_one_sided": 0.9998027252458997,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "USDCAD"
+    },
+    {
+      "p_one_sided": 0.990878179887528,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "USDJPY"
+    },
+    {
+      "p_one_sided": 0.7373602247390665,
+      "q": 0.9999872593895188,
+      "reject": false,
+      "symbol": "XAUUSD"
+    }
+  ],
+  "placebos": {
+    "random_entry": {
+      "mean_placebo": -0.14859753184414176,
+      "n_trades": 3155,
+      "observed": -0.16580675380746737,
+      "pvalue": 0.718,
+      "sd_placebo": 0.030312388532265356
+    },
+    "random_level": {
+      "mean_placebo": -0.2393549177992277,
+      "n_draws": 200,
+      "note": "random active level at the same timestamp; stop re-derived, target distance fixed",
+      "observed": -0.16580675380746737,
+      "pvalue": 0.0,
+      "sd_placebo": 0.0044137726873635956
+    }
+  },
+  "reality_check": {
+    "n_models": 2,
+    "pvalue": 1.0,
+    "stat": -0.042331042434109165
+  },
+  "spa": {
+    "n_models": 2,
+    "pvalue": 1.0,
+    "stat": 0.0
+  },
+  "bootstrap": {
+    "mean_r": {
+      "point": -0.16580675380746734,
+      "ci_low": -0.22813485665560332,
+      "ci_high": -0.1013789084639221,
+      "n_boot": 5000,
+      "mean_block": 20,
+      "seed": 20261102
+    },
+    "sharpe": {
+      "point": -2.7889345331169793,
+      "ci_low": -3.9595881443221095,
+      "ci_high": -1.6631648756437785,
+      "n_boot": 5000,
+      "mean_block": 20,
+      "seed": 20261102
+    }
+  }
+}

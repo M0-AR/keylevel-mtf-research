@@ -1,0 +1,15 @@
+numpy<3,>=2.2
+pandas<3,>=2.2
+scipy<2,>=1.13
+statsmodels<1,>=0.15
+matplotlib<4,>=3.8
+pyarrow>=26
+PyYAML>=6
+requests>=2.32
+curl_cffi>=0.16
+beautifulsoup4>=4.15
+tqdm>=4.68
+tabulate>=0.9
+
+[dev]
+pytest>=8.3

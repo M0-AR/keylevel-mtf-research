@@ -1,0 +1,7 @@
+{
+  "params": {
+    "cluster_atr": 1.0,
+    "confirmation_closes": 3,
+    "min_touches": 3
+  }
+}

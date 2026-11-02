@@ -1,0 +1,186 @@
+{
+  "inference": {
+    "alpha_beta_base": {
+      "alpha_ann": -0.5446224419876402,
+      "beta": 0.06309598201459747,
+      "p_alpha": 3.649452679072864e-07,
+      "t_alpha": -5.086388936883429
+    },
+    "alpha_beta_winner": {
+      "alpha_ann": -0.23926509062930157,
+      "beta": 0.043255439368708695,
+      "p_alpha": 0.011855566545239631,
+      "t_alpha": -2.51641448829376
+    },
+    "benchmarks": [
+      {
+        "ann_return": 0.11743145712702696,
+        "ann_vol": 0.0587508824920817,
+        "calmar": 2.0422923831995763,
+        "kurtosis": 15.513171703160008,
+        "max_drawdown": -0.05749982622128369,
+        "n_days": 783.0,
+        "sharpe": 1.9196118630423378,
+        "skew": 0.31021353038982097,
+        "sortino": 2.9158586875376153,
+        "split": "holdout",
+        "variant": "buy_and_hold"
+      },
+      {
+        "ann_return": -0.026886884874343875,
+        "ann_vol": 0.04131798732766153,
+        "calmar": -0.3069941057375337,
+        "kurtosis": 7.991683028000398,
+        "max_drawdown": -0.08758111107622035,
+        "n_days": 783.0,
+        "sharpe": -0.638940527572062,
+        "skew": -0.7658553785125327,
+        "sortino": -0.828828305864979,
+        "split": "holdout",
+        "variant": "trend_only"
+      },
+      {
+        "ann_return": 0.030808432753149262,
+        "ann_vol": 0.0631340421896593,
+        "calmar": 0.5899455240912539,
+        "kurtosis": 10.171920285657343,
+        "max_drawdown": -0.052222504443281026,
+        "n_days": 783.0,
+        "sharpe": 0.5121975782976281,
+        "skew": -0.3022534001208341,
+        "sortino": 0.7334737639564222,
+        "split": "holdout",
+        "variant": "sma_50_200"
+      },
+      {
+        "ann_return": -0.027797669691143723,
+        "ann_vol": 0.03917331045695448,
+        "calmar": -0.31325060733701104,
+        "kurtosis": 8.835057599588541,
+        "max_drawdown": -0.08873939599816183,
+        "n_days": 783.0,
+        "sharpe": -0.700025438019366,
+        "skew": -0.8345967097423571,
+        "sortino": -0.9033467471932308,
+        "split": "holdout",
+        "variant": "donchian_20"
+      }
+    ],
+    "dsr_base": {
+      "dsr": 1.1359967409993836e-23,
+      "kurtosis": 4.632807368780923,
+      "n": 783.0,
+      "n_trials": 28.0,
+      "skew": 0.5993881878193026,
+      "sr": -0.17568636184446615,
+      "sr0": 0.20349926163726104
+    },
+    "dsr_winner": {
+      "dsr": 4.174179238770619e-15,
+      "kurtosis": 4.869818457751087,
+      "n": 783.0,
+      "n_trials": 28.0,
+      "skew": 0.8499994264550159,
+      "sr": -0.08484209096672947,
+      "sr0": 0.20349926163726104
+    },
+    "n_trials": 28,
+    "pbo": {
+      "is_best_counts": {
+        "3": 1,
+        "4": 5,
+        "5": 85,
+        "10": 58,
+        "11": 8,
+        "13": 5,
+        "14": 11,
+        "16": 132,
+        "17": 619
+      },
+      "mean_logit": -1.7718433074171882,
+      "median_oos_rank": 2.0,
+      "n_obs": 2076,
+      "n_splits": 924,
+      "n_variants": 18,
+      "pbo": 0.10714285714285714
+    },
+    "per_instrument_bh": [
+      {
+        "p_one_sided": 0.9999872593895188,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "AUDUSD"
+      },
+      {
+        "p_one_sided": 0.9068546541867843,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "EURUSD"
+      },
+      {
+        "p_one_sided": 0.9979075355419138,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "GBPUSD"
+      },
+      {
+        "p_one_sided": 0.033314916484342316,
+        "q": 0.26651933187473853,
+        "reject": false,
+        "symbol": "NSXUSD"
+      },
+      {
+        "p_one_sided": 0.9548665617590173,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "SPXUSD"
+      },
+      {
+        "p_one_sided": 0.9998027252458997,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "USDCAD"
+      },
+      {
+        "p_one_sided": 0.990878179887528,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "USDJPY"
+      },
+      {
+        "p_one_sided": 0.7373602247390665,
+        "q": 0.9999872593895188,
+        "reject": false,
+        "symbol": "XAUUSD"
+      }
+    ],
+    "placebos": {
+      "random_entry": {
+        "mean_placebo": -0.14859753184414176,
+        "n_trades": 3155,
+        "observed": -0.16580675380746737,
+        "pvalue": 0.718,
+        "sd_placebo": 0.030312388532265356
+      },
+      "random_level": {
+        "mean_placebo": -0.2393549177992277,
+        "n_draws": 200,
+        "note": "random active level at the same timestamp; stop re-derived, target distance fixed",
+        "observed": -0.16580675380746737,
+        "pvalue": 0.0,
+        "sd_placebo": 0.0044137726873635956
+      }
+    },
+    "reality_check": {
+      "n_models": 2,
+      "pvalue": 1.0,
+      "stat": -0.042331042434109165
+    },
+    "spa": {
+      "n_models": 2,
+      "pvalue": 1.0,
+      "stat": 0.0
+    }
+  },
+  "winner": "StrategyResult(name='grid_winner', split='holdout', trades=      symbol   asset_class  side  ... cost_multiplier cost_price  exit_date\n0     EURUSD      fx_major     1  ...             1.0    0.00005 2023-01-03\n1     EURUSD      fx_major    -1  ...             1.0    0.00005 2023-01-06\n2     EURUSD      fx_major    -1  ...             1.0    0.00005 2023-01-06\n3     EURUSD      fx_major     1  ...             1.0    0.00005 2023-01-12\n4     EURUSD      fx_major     1  ...             1.0    0.00005 2023-01-13\n...      ...           ...   ...  ...             ...        ...        ...\n1455  NSXUSD  equity_index    -1  ...             1.0    1.00000 2025-11-17\n1456  NSXUSD  equity_index     1  ...             1.0    1.00000 2025-11-26\n1457  NSXUSD  equity_index    -1  ...             1.0    1.00000 2025-12-16\n1458  NSXUSD  equity_index    -1  ...             1.0    1.00000 2025-12-17\n1459  NSXUSD  equity_index    -1  ...             1.0    1.00000 2025-12-19\n\n[1460 rows x 26 columns], daily=date\n2023-01-02    0.000000\n2023-01-03   -0.003009\n2023-01-04    0.000000\n2023-01-05   -0.005419\n2023-01-06    0.007746\n                ...   \n2025-12-25    0.000000\n2025-12-26   -0.001946\n2025-12-29   -0.008637\n2025-12-30   -0.010970\n2025-12-31    0.000000\nFreq: B, Length: 783, dtype: float64, per_symbol_daily=              EURUSD  GBPUSD    USDJPY  ...    XAUUSD   SPXUSD  NSXUSD\ndate                                    ...                           \n2023-01-02  0.000000     0.0  0.000000  ...  0.000000  0.00000     0.0\n2023-01-03  0.008098     0.0  0.000000  ... -0.005622  0.00000     0.0\n2023-01-04  0.000000     0.0  0.000000  ...  0.000000  0.00000     0.0\n2023-01-05  0.000000     0.0  0.000000  ... -0.005419  0.00000     0.0\n2023-01-06 -0.010624     0.0  0.000000  ...  0.024210 -0.00584     0.0\n...              ...     ...       ...  ...       ...      ...     ...\n2025-12-25  0.000000     0.0  0.000000  ...  0.000000  0.00000     0.0\n2025-12-26  0.009426     0.0 -0.005390  ...  0.000000  0.00000     0.0\n2025-12-29 -0.012399     0.0  0.003762  ...  0.000000  0.00000     0.0\n2025-12-30  0.000000     0.0 -0.010970  ...  0.000000  0.00000     0.0\n2025-12-31  0.000000     0.0  0.000000  ...  0.000000  0.00000     0.0\n\n[783 rows x 8 columns], per_symbol=   symbol    split      variant  ...  target_rate  time_rate  trend_flip_rate\n0  EURUSD  holdout  grid_winner  ...     0.153488   0.023256         0.134884\n1  GBPUSD  holdout  grid_winner  ...     0.174863   0.038251         0.131148\n2  USDJPY  holdout  grid_winner  ...     0.170984   0.041451         0.062176\n3  AUDUSD  holdout  grid_winner  ...     0.147679   0.021097         0.130802\n4  USDCAD  holdout  grid_winner  ...     0.165217   0.017391         0.117391\n5  XAUUSD  holdout  grid_winner  ...     0.153846   0.067308         0.173077\n6  SPXUSD  holdout  grid_winner  ...     0.171233   0.034247         0.102740\n7  NSXUSD  holdout  grid_winner  ...     0.190789   0.052632         0.118421\n\n[8 rows x 22 columns], signals=       signal_idx           signal_ts  ...  risk_proxy  symbol\n0            3210 2012-02-16 11:00:00  ...    0.002135  EURUSD\n1            5031 2012-03-14 09:15:00  ...    0.001070  EURUSD\n2            5032 2012-03-14 09:30:00  ...    0.001488  EURUSD\n3            5034 2012-03-14 10:00:00  ...    0.001520  EURUSD\n4            5114 2012-03-15 06:00:00  ...    0.001334  EURUSD\n...           ...                 ...  ...         ...     ...\n10713      323246 2025-11-26 01:00:00  ...   35.583300  NSXUSD\n10714      323248 2025-11-26 01:30:00  ...   23.162879  NSXUSD\n10715      324399 2025-12-15 13:30:00  ...  109.612650  NSXUSD\n10716      324519 2025-12-16 22:30:00  ...   25.737393  NSXUSD\n10717      324715 2025-12-19 02:30:00  ...   25.893839  NSXUSD\n\n[10718 rows x 16 columns], params={'cluster_atr': 1.0, 'confirmation_closes': 3, 'min_touches': 3}, elapsed_s=20.27381992340088)"
+}

@@ -1,0 +1,9 @@
+symbol,n_weeks,corr,mean_abs_weekly_return_diff,histdata_ann_vol,yahoo_ann_vol,note
+EURUSD,730,0.7884774848023527,0.0053150880037696946,0.07803260471430662,0.07551727287569589,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+GBPUSD,730,0.7704138409457396,0.005822518495254575,0.0867549668126717,0.08817396058760121,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+USDJPY,730,0.7550348602368464,0.006371463180293841,0.09149663448128137,0.09114914161253498,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+AUDUSD,730,0.7824345908385067,0.006663873680274768,0.10049943646318307,0.09772665813899765,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+USDCAD,730,0.7598103618375265,0.005034753971949924,0.06824516443955862,0.07025150079394339,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+XAUUSD,730,0.975395496393927,0.0031348021841237543,0.14723051520631664,0.15308037069209446,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+SPXUSD,729,0.9951859705676585,0.0014311221519596748,0.15769949299300748,0.15781394270580157,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)
+NSXUSD,729,0.9966988586857873,0.0014440433289813475,0.18714296903199065,0.1876475651554942,weekly close-to-close returns; levels are not compared because vendors quote different instruments (spot vs futures)

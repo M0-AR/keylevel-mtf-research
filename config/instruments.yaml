@@ -1,0 +1,73 @@
+# Instrument universe and cost assumptions.
+#
+# Cost fields are in *price units* (not pips) so the engine is asset-agnostic.
+# half_spread_price is half of the quoted bid-ask spread; slippage_price is the
+# adverse price move per side.  Base round-trip cost = 2*(half_spread+slippage).
+# These are deliberately conservative stylised assumptions, not broker quotes.
+# A cost multiplier sensitivity (0x, 1x, 2x, 3x) is reported.
+
+instruments:
+  EURUSD:
+    asset_class: fx_major
+    histdata_symbol: EURUSD
+    yahoo_symbol: "EURUSD=X"
+    pip_size: 0.0001
+    price_digits: 5
+    half_spread_price: 0.00003
+    slippage_price: 0.00002
+  GBPUSD:
+    asset_class: fx_major
+    histdata_symbol: GBPUSD
+    yahoo_symbol: "GBPUSD=X"
+    pip_size: 0.0001
+    price_digits: 5
+    half_spread_price: 0.00004
+    slippage_price: 0.00003
+  USDJPY:
+    asset_class: fx_major
+    histdata_symbol: USDJPY
+    yahoo_symbol: "USDJPY=X"
+    pip_size: 0.01
+    price_digits: 3
+    half_spread_price: 0.003
+    slippage_price: 0.002
+  AUDUSD:
+    asset_class: fx_major
+    histdata_symbol: AUDUSD
+    yahoo_symbol: "AUDUSD=X"
+    pip_size: 0.0001
+    price_digits: 5
+    half_spread_price: 0.00004
+    slippage_price: 0.00003
+  USDCAD:
+    asset_class: fx_major
+    histdata_symbol: USDCAD
+    yahoo_symbol: "USDCAD=X"
+    pip_size: 0.0001
+    price_digits: 5
+    half_spread_price: 0.00004
+    slippage_price: 0.00003
+  XAUUSD:
+    asset_class: metal
+    histdata_symbol: XAUUSD
+    yahoo_symbol: "GC=F"
+    pip_size: 0.01
+    price_digits: 2
+    half_spread_price: 0.15
+    slippage_price: 0.10
+  SPXUSD:
+    asset_class: equity_index
+    histdata_symbol: SPXUSD
+    yahoo_symbol: "^GSPC"
+    pip_size: 0.1
+    price_digits: 2
+    half_spread_price: 0.25
+    slippage_price: 0.25
+  NSXUSD:
+    asset_class: equity_index
+    histdata_symbol: NSXUSD
+    yahoo_symbol: "^NDX"
+    pip_size: 0.1
+    price_digits: 2
+    half_spread_price: 0.50
+    slippage_price: 0.50

@@ -1,0 +1,89 @@
+# Frozen base specification.  Changing any value below invalidates the
+# pre-registered holdout and requires a DEVIATIONS.md entry.
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  results_dir: results
+  live_dir: data/live
+  start: "2012-01-01"
+  end: "2025-12-31"
+  histdata_timezone_offset_hours: -5   # EST, no DST (vendor spec)
+  histdata_m1_year_start: 2012
+  histdata_m1_year_end: 2025
+  instrument_file: config/instruments.yaml
+
+strategy:
+  entry_timeframe: "15min"
+  trend_timeframe: "4h"
+  level_timeframes: ["1D", "1W", "1M"]
+  pivot_left: 2
+  pivot_right: 2
+  trend_pivot_left: 3
+  trend_pivot_right: 3
+  level_price_source: "body"           # body | wick
+  cluster_atr: 0.50                    # x ATR(14, D1)
+  min_touches: 2
+  level_expiry_days: 730
+  touch_lookback: 300
+  confirmation_closes: 2
+  max_chase_atr: 1.0
+  stop_buffer_atr: 0.25
+  stop_extreme_lookback: 5
+  stop_extreme_buffer_atr: 0.10
+  max_stop_atr: 4.0
+  default_rr: 2.0
+  max_rr: 5.0
+  max_hold_bars: 96
+  risk_per_trade: 0.005
+  require_directional_candle: true
+  trend_method: "swing"                # swing | ema
+  require_trend: true                  # false = level-only ablation
+  ema_length: 200
+  ema_slope_bars: 5
+
+splits:
+  development:
+    start: "2012-01-01"
+    end: "2019-12-31"
+  validation:
+    start: "2020-01-01"
+    end: "2022-12-31"
+  holdout:
+    start: "2023-01-01"
+    end: "2025-12-31"
+
+costs:
+  multiplier: 1.0
+
+stats:
+  n_bootstrap: 5000
+  block_mean_days: 20
+  n_placebo_draws: 1000
+  cscv_slices: 12
+  alpha: 0.05
+  seed: 20261102
+
+grid:
+  cluster_atr: [0.25, 0.50, 1.00]
+  min_touches: [2, 3]
+  confirmation_closes: [1, 2, 3]
+
+live:
+  start: "2026-01-01"
+  yahoo_symbols:
+    - "EURUSD=X"
+    - "GBPUSD=X"
+    - "USDJPY=X"
+    - "AUDUSD=X"
+    - "USDCAD=X"
+    - "GC=F"
+    - "^GSPC"
+    - "^NDX"
+    - "BTC-USD"
+    - "ETH-USD"
+  kraken_pairs:
+    - "XBTUSD"
+    - "ETHUSD"
+  intraday_interval: "15m"
+  intraday_chunk_days: 50
