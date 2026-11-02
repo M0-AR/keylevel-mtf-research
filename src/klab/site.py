@@ -690,6 +690,9 @@ def _tokens(root: Path, data: dict[str, Any]) -> dict[str, str]:
         "LIVE_PF": _num(live["profit_factor"]),
         "TOTAL_TRADES": f"{total_trades:,}",
         "PAGES_URL": preview_url,
+        "PAGES_ROOT": f"{pages_url}/" if pages_url else "index.html",
+        "PAGES_PREVIEW": f"{pages_url}/preview.html" if pages_url else "preview.html",
+        "PAGES_DOCS": f"{pages_url}/docs/preview.html" if pages_url else "docs/preview.html",
         "PREVIEW_URL": preview_url,
         "PREVIEW_LABEL": preview_label,
         "PAGES_BADGE": "live site" if pages_url else "static HTML",
@@ -816,6 +819,18 @@ def build_preview(root: Path, data: dict[str, Any], tokens: dict[str, str]) -> P
     for name in ("preview.html", "index.html"):
         (root / name).write_text(page, encoding="utf-8")
     (root / ".nojekyll").touch()
+    mirror = (
+        page.replace('content="assets/social-preview.png"', 'content="../assets/social-preview.png"')
+        .replace('href="README.md"', 'href="../README.md"')
+        .replace('href="RESEARCH.md"', 'href="../RESEARCH.md"')
+        .replace('href="paper/main.pdf"', 'href="../paper/main.pdf"')
+        .replace('href="LICENSE.md"', 'href="../LICENSE.md"')
+    )
+    docs = root / "docs"
+    docs.mkdir(exist_ok=True)
+    for name in ("preview.html", "index.html"):
+        (docs / name).write_text(mirror, encoding="utf-8")
+    (docs / ".nojekyll").touch()
     return root / "preview.html"
 
 

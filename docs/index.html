@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeyLevel Lab — Do multi-timeframe key levels work?</title>
+<meta name="description" content="A pre-registered test of the multi-timeframe key-level trading strategy on 2.93 million bars and a sealed 2023–2025 holdout. The verdict: a null result, and a reusable due-diligence method.">
+<meta name="theme-color" content="#070b14">
+<meta property="og:title" content="KeyLevel Lab — Do multi-timeframe key levels work?">
+<meta property="og:description" content="A pre-registered test on eight liquid instruments, 14,602 trades, and a sealed holdout. The answer is clear — and useful.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="../assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b14'/%3E%3Cpath d='M14 44 L26 30 L36 38 L50 18' stroke='%23e0a43a' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#070b14; --bg2:#0a1120; --panel:#0e1626; --panel2:#121d31;
+  --ink:#e8eef7; --muted:#9fb0c8; --line:rgba(255,255,255,.10);
+  --gold:#e0a43a; --gold2:#f4d28a; --teal:#2dd4bf; --coral:#f87171; --blue:#60a5fa;
+  --paper:#f6f8fc; --paper-ink:#0b1220; --paper-muted:#475569;
+  --shadow:0 24px 70px rgba(0,0,0,.36);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(224,164,58,.18), transparent 60%),
+    radial-gradient(900px 520px at 88% 4%, rgba(45,212,191,.12), transparent 58%),
+    radial-gradient(800px 600px at 50% 100%, rgba(96,165,250,.08), transparent 60%),
+    var(--bg);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--gold2); text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%; display:block}
+button,input,select{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold2); outline-offset:3px; border-radius:6px}
+.skip{position:absolute; left:-999px; top:10px; background:var(--gold2); color:#111; padding:10px 16px; z-index:99; border-radius:8px}
+.skip:focus{left:10px}
+.wrap{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+
+/* Header */
+header.site{
+  position:sticky; top:0; z-index:50; backdrop-filter:blur(16px);
+  background:rgba(7,11,20,.78); border-bottom:1px solid var(--line);
+}
+.nav{display:flex; align-items:center; justify-content:space-between; gap:18px; padding:14px 0}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em; color:var(--ink)}
+.brand:hover{text-decoration:none}
+.mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(145deg,var(--gold),#8a5a12); display:grid; place-items:center; color:#0b1220; font-size:.8rem; font-weight:900}
+.nav-links{display:flex; gap:18px; flex-wrap:wrap; font-size:.88rem}
+.nav-links a{color:var(--muted)}
+.nav-links a:hover{color:var(--ink); text-decoration:none}
+.nav-cta{display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border-radius:999px; background:var(--gold2); color:#111; font-weight:800; font-size:.84rem}
+.nav-cta:hover{text-decoration:none; filter:brightness(1.05)}
+
+/* Hero */
+.hero{padding:64px 0 34px}
+.hero-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:34px; align-items:center}
+.eyebrow{display:inline-flex; align-items:center; gap:9px; color:var(--gold2); font-size:.76rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase}
+.eyebrow:before{content:""; width:28px; height:1px; background:var(--gold2); display:inline-block}
+h1{font-size:clamp(2.4rem,5.4vw,4.7rem); line-height:1.02; letter-spacing:-.045em; margin:16px 0 18px}
+.grad{background:linear-gradient(115deg,#fff 8%,var(--gold2) 52%,var(--teal) 100%); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lead{font-size:clamp(1.02rem,1.5vw,1.18rem); color:var(--muted); max-width:62ch; margin:0 0 24px}
+.verdict-pill{display:inline-flex; align-items:center; gap:10px; padding:10px 15px; border-radius:999px; border:1px solid rgba(248,113,113,.42); background:rgba(248,113,113,.10); color:#fecaca; font-weight:800; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--coral); box-shadow:0 0 0 5px rgba(248,113,113,.14)}
+.cta-row{display:flex; gap:12px; flex-wrap:wrap; margin:24px 0 14px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:13px 20px; border-radius:12px; border:1px solid transparent; font-weight:800; font-size:.94rem; transition:transform .18s ease, filter .18s ease, background .18s ease}
+.btn:hover{text-decoration:none; transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#111; box-shadow:0 12px 30px rgba(224,164,58,.18)}
+.btn-ghost{border-color:var(--line); color:var(--ink); background:rgba(255,255,255,.03)}
+.btn-ghost:hover{background:rgba(255,255,255,.07)}
+.micro{color:var(--muted); font-size:.84rem; max-width:62ch}
+.hero-card{
+  position:relative; border-radius:28px; padding:24px; border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.hero-card:before{content:""; position:absolute; inset:-40% -20% auto auto; width:280px; height:280px; background:radial-gradient(circle,rgba(224,164,58,.22),transparent 65%); pointer-events:none}
+.verdict-big{font-size:clamp(2rem,4vw,3.1rem); line-height:1; letter-spacing:-.05em; font-weight:900; color:#fecaca; margin:4px 0 6px}
+.verdict-sub{color:var(--muted); font-size:.92rem; margin:0 0 18px}
+.kpis{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.kpi{padding:14px; border-radius:14px; background:rgba(0,0,0,.22); border:1px solid var(--line)}
+.kpi b{display:block; font-size:1.35rem; letter-spacing:-.03em}
+.kpi span{display:block; color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.08em; margin-top:4px}
+.kpi.neg b{color:#fca5a5}
+.kpi.pos b{color:#5eead4}
+.hero-note{margin:14px 0 0; color:var(--muted); font-size:.78rem}
+
+/* Sections */
+section{padding:72px 0; border-top:1px solid rgba(255,255,255,.06)}
+section.hero{border-top:0}
+.section-head{max-width:78ch; margin-bottom:30px}
+h2{font-size:clamp(1.7rem,3vw,2.6rem); line-height:1.1; letter-spacing:-.035em; margin:10px 0 12px}
+h3{font-size:1.12rem; letter-spacing:-.015em; margin:0 0 8px}
+.lead-sm{color:var(--muted); font-size:1rem; margin:0}
+.pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 0}
+.pill{display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:999px; border:1px solid var(--line); color:var(--muted); font-size:.76rem; background:rgba(255,255,255,.03)}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+.grid-4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.hero-grid>*,.explorer>*,.quiz-shell>*,.grid-2>*,.grid-3>*,.grid-4>*,.chart-grid>*,.footer-grid>*{min-width:0}
+.card{padding:20px; border-radius:var(--radius); border:1px solid var(--line); background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)); box-shadow:0 14px 40px rgba(0,0,0,.16)}
+.card p:last-child{margin-bottom:0}
+.card .big{font-size:1.7rem; font-weight:900; letter-spacing:-.04em; line-height:1.1; margin:2px 0 4px}
+.card .label{color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.09em}
+.card.gold{border-color:rgba(224,164,58,.34); background:linear-gradient(180deg,rgba(224,164,58,.10),rgba(255,255,255,.02))}
+.card.teal{border-color:rgba(45,212,191,.30); background:linear-gradient(180deg,rgba(45,212,191,.09),rgba(255,255,255,.02))}
+.card.coral{border-color:rgba(248,113,113,.30); background:linear-gradient(180deg,rgba(248,113,113,.09),rgba(255,255,255,.02))}
+.callout{padding:18px 20px; border-radius:16px; border:1px solid rgba(224,164,58,.34); background:rgba(224,164,58,.08); color:#f8e7c1}
+.callout strong{color:#fff}
+.quiet{color:var(--muted)}
+.small{font-size:.86rem}
+.tiny{font-size:.76rem}
+
+/* Charts on light "paper" cards */
+.chart-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.chart-grid .wide{grid-column:1/-1}
+figure.chart-figure{margin:0; padding:16px; border-radius:18px; background:var(--paper); color:var(--paper-ink); border:1px solid rgba(255,255,255,.12); box-shadow:0 18px 40px rgba(0,0,0,.18)}
+figure.chart-figure svg{width:100%; height:auto; display:block}
+figure.chart-figure figcaption{margin-top:10px; color:var(--paper-muted); font-size:.82rem; line-height:1.5}
+figure.chart-figure figcaption strong{color:var(--paper-ink)}
+
+/* Tables */
+.table-wrap{overflow:auto; border-radius:16px; border:1px solid var(--line); background:rgba(0,0,0,.18)}
+table{width:100%; border-collapse:collapse; font-size:.87rem; min-width:620px}
+caption{text-align:left; padding:14px 16px 0; color:var(--muted); font-size:.82rem}
+th,td{padding:11px 14px; text-align:right; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); background:rgba(255,255,255,.03); position:sticky; top:0}
+tr:last-child td{border-bottom:0}
+td.neg{color:#fca5a5}
+td.pos{color:#5eead4}
+.table-note{color:var(--muted); font-size:.8rem; margin:10px 0 0}
+
+/* Claims */
+.claim{border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); padding:0 16px; margin:10px 0}
+.claim summary{cursor:pointer; padding:14px 0; font-weight:800; list-style:none}
+.claim summary::-webkit-details-marker{display:none}
+.claim summary:before{content:"＋"; color:var(--gold2); margin-right:10px; font-weight:900}
+.claim[open] summary:before{content:"−"}
+.claim .evidence{padding:0 0 16px; color:var(--muted); font-size:.92rem}
+.claim .evidence b{color:var(--ink)}
+
+/* Explorer */
+.explorer{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.control{display:grid; gap:8px; margin:14px 0 18px}
+.control label{font-weight:800; font-size:.9rem}
+.control input[type=range]{width:100%; accent-color:var(--gold)}
+.control select{width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--ink)}
+.range-labels{display:flex; justify-content:space-between; color:var(--muted); font-size:.74rem}
+.cost-readout{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:12px 0}
+.cost-readout div{padding:12px; border-radius:12px; background:rgba(0,0,0,.22); border:1px solid var(--line)}
+.cost-readout b{display:block; font-size:1.2rem}
+.cost-readout span{color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.07em}
+.bars{display:grid; gap:9px; margin-top:14px}
+.bar-row{display:grid; grid-template-columns:56px 1fr 74px; align-items:center; gap:10px; font-size:.8rem}
+.bar-track{height:12px; border-radius:999px; background:rgba(255,255,255,.07); overflow:hidden}
+.bar-fill{height:100%; border-radius:999px; background:linear-gradient(90deg,var(--coral),#b91c1c)}
+.bar-row.active .bar-track{box-shadow:0 0 0 1px var(--gold2)}
+.bar-row.active .bar-fill{background:linear-gradient(90deg,var(--gold2),var(--gold))}
+
+/* Timeline / steps */
+.steps{display:grid; gap:12px}
+.step{display:grid; grid-template-columns:38px 1fr; gap:14px; align-items:start; padding:14px; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,.03)}
+.step .num{width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:rgba(224,164,58,.16); color:var(--gold2); font-weight:900}
+.step p{margin:2px 0 0; color:var(--muted); font-size:.9rem}
+
+/* Quiz */
+.quiz-shell{display:grid; grid-template-columns:.9fr 1.1fr; gap:18px; align-items:start}
+.quiz-meta{padding:20px; border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.03)}
+.quiz-meta h3{margin-top:0}
+.quiz-meta ul{padding-left:18px; color:var(--muted); font-size:.9rem}
+.quiz-card{padding:22px; border-radius:20px; border:1px solid rgba(224,164,58,.30); background:linear-gradient(180deg,rgba(224,164,58,.08),rgba(255,255,255,.02)); box-shadow:var(--shadow)}
+.quiz-top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px}
+.level-tag{font-size:.7rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase; color:var(--gold2); border:1px solid rgba(224,164,58,.35); background:rgba(224,164,58,.10); padding:5px 9px; border-radius:999px}
+.progress{height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin:10px 0 18px}
+.progress > span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--gold2),var(--teal)); transition:width .35s ease}
+fieldset{border:0; padding:0; margin:0; min-width:0}
+legend{font-size:1.12rem; font-weight:850; line-height:1.35; padding:0; margin-bottom:14px}
+.options{display:grid; gap:9px}
+.option{display:flex; gap:11px; align-items:flex-start; padding:12px 13px; border-radius:12px; border:1px solid var(--line); background:rgba(0,0,0,.20); cursor:pointer; transition:border-color .16s ease, background .16s ease}
+.option:hover{border-color:rgba(224,164,58,.45); background:rgba(224,164,58,.06)}
+.option input{margin-top:4px; accent-color:var(--gold)}
+.option span{font-size:.92rem}
+.option.correct{border-color:rgba(45,212,191,.55); background:rgba(45,212,191,.08)}
+.option.wrong{border-color:rgba(248,113,113,.55); background:rgba(248,113,113,.08)}
+.quiz-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.quiz-actions .btn{padding:11px 16px}
+.feedback{margin-top:14px; padding:13px 15px; border-radius:12px; font-size:.9rem; border:1px solid transparent; min-height:50px}
+.feedback.correct{border-color:rgba(45,212,191,.45); background:rgba(45,212,191,.09); color:#c7fff7}
+.feedback.wrong{border-color:rgba(248,113,113,.45); background:rgba(248,113,113,.09); color:#ffd1d1}
+.feedback.neutral{color:var(--muted); background:rgba(255,255,255,.03); border-color:var(--line)}
+.result{display:none}
+.result.show{display:block}
+.result .score{font-size:3rem; font-weight:900; letter-spacing:-.05em; line-height:1; margin:8px 0}
+.tier{display:inline-block; margin:6px 0 10px; padding:6px 11px; border-radius:999px; background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.35); color:#a7f3d0; font-weight:900; font-size:.78rem; letter-spacing:.06em; text-transform:uppercase}
+
+/* Business / deliverables */
+.usecase{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+.usecase .card{padding:16px}
+.usecase .card p{margin:6px 0 0; color:var(--muted); font-size:.9rem}
+.checklist{list-style:none; padding:0; margin:0; display:grid; gap:8px}
+.checklist li{padding-left:28px; position:relative; color:var(--muted); font-size:.92rem}
+.checklist li:before{content:"✓"; position:absolute; left:0; top:0; color:var(--teal); font-weight:900}
+
+/* Code */
+pre{overflow:auto; padding:16px; border-radius:14px; background:#050912; border:1px solid var(--line); font-size:.82rem; line-height:1.6; color:#d7e2f3}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.tree{white-space:pre; font-size:.78rem; line-height:1.65}
+
+/* Footer */
+footer{padding:48px 0 64px; border-top:1px solid var(--line); color:var(--muted); font-size:.86rem}
+.footer-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:24px; align-items:start}
+.footer-brand{display:flex; align-items:center; gap:10px; color:var(--ink); font-weight:900; margin-bottom:8px}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--gold2)}
+.backtop{display:inline-flex; align-items:center; gap:8px; margin-top:12px}
+
+/* Reveal */
+.reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* Responsive */
+@media (max-width: 980px){
+  .hero-grid,.explorer,.quiz-shell,.grid-2,.chart-grid,.footer-grid{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .grid-4{grid-template-columns:1fr 1fr}
+  .chart-grid .wide{grid-column:auto}
+  .nav{flex-wrap:wrap}
+  .nav-links{order:3; flex-basis:100%; flex-wrap:nowrap; gap:10px; overflow-x:auto; padding-bottom:2px; font-size:.74rem; white-space:nowrap; scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+}
+@media (max-width: 620px){
+  .wrap{width:min(100% - 26px, 1180px)}
+  section{padding:54px 0}
+  .hero{padding-top:42px}
+  .grid-3,.grid-4,.usecase{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .cost-readout{grid-template-columns:1fr}
+  table{min-width:540px}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*:before,*:after{animation:none!important; transition:none!important}
+  .reveal{opacity:1; transform:none}
+}
+@media print{
+  header.site,.cta-row,.quiz-shell,.nav-cta,.backtop{display:none!important}
+  body{background:#fff; color:#111}
+  section{border-color:#ddd; padding:24px 0}
+  .card,figure.chart-figure,.table-wrap{border-color:#ddd; box-shadow:none; background:#fff; color:#111}
+  .grad{color:#111; background:none; -webkit-text-fill-color:#111}
+  .muted,.lead,.quiet,.small{color:#444}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="mark">KL</span> KeyLevel Lab</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#verdict">Verdict</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#explore">Explore</a>
+      <a href="#learn">Learn</a>
+      <a href="#business">Business</a>
+      <a href="#reproduce">Reproduce</a>
+    </nav>
+    <a class="nav-cta" href="#learn">Take the quiz</a>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Independent research · 2012–2025 · 2,930,707 bars</span>
+      <h1>Do multi-timeframe <span class="grad">key levels</span> actually work?</h1>
+      <p class="lead">A pre-registered test on eight liquid instruments, <strong>14,602 trades</strong>, and a sealed 2023–2025 holdout. The answer is clear — and the method is the valuable part.</p>
+      <div class="verdict-pill"><span class="dot" aria-hidden="true"></span> Verdict: null result</div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#evidence">Read the evidence</a>
+        <a class="btn btn-ghost" href="#learn">Take the 12-question course</a>
+      </div>
+      <p class="micro">No story, no cherry-picked chart, no paid signal. Every number on this page is produced by the pipeline and stored in the repository. <strong>Not financial advice.</strong></p>
+      <div class="pill-row" aria-label="Research snapshot">
+        <span class="pill">8 instruments</span>
+        <span class="pill">18 pre-registered variants</span>
+        <span class="pill">3 samples + 2026 shadow</span>
+        <span class="pill">0 duplicate timestamps</span>
+      </div>
+    </div>
+
+    <aside class="hero-card" aria-label="The verdict in four numbers">
+      <div class="verdict-big">NULL</div>
+      <p class="verdict-sub">The pre-registered success test failed on the sealed holdout.</p>
+      <div class="kpis">
+        <div class="kpi"><b>3,155</b><span>Holdout trades</span></div>
+        <div class="kpi neg"><b>-0.166R</b><span>Mean net return</span></div>
+        <div class="kpi neg"><b>-2.79</b><span>Net Sharpe ratio</span></div>
+        <div class="kpi neg"><b>-92.45%</b><span>Maximum drawdown</span></div>
+      </div>
+      <p class="hero-note">Development: -0.205R · Validation: -0.121R · Holdout: -0.166R. The sign never reverses.</p>
+    </aside>
+  </div>
+</section>
+
+<section id="verdict">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The claim</span>
+      <h2>A popular idea, tested without moving the goalposts</h2>
+      <p class="lead-sm">The method says that when pivots from monthly, weekly, and daily charts cluster into a “key level,” price will react there. Add a 4-hour trend filter and a 15-minute confirmation, and the win rate is said to be very high. We wrote the rules down before opening the answer, froze the code, and charged real costs.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <div class="claim">
+          <details>
+            <summary>“Key levels are high-probability reversal points.”</summary>
+            <div class="evidence">The strict hold rate was <b>15.5%</b>. Price reached +1R before −1R in <b>49.2%</b> of executed signals. That is close to a coin flip, not a high-probability reversal.</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“Multi-timeframe confluence gives a 90% win rate.”</summary>
+            <div class="evidence">The sealed holdout win rate was <b>29.4%</b> and the profit factor was <b>0.79</b>. The 90% claim is not supported.</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“The right settings make it work.”</summary>
+            <div class="evidence"><b>18 of 18</b> pre-registered variants had a negative net Sharpe. The least-bad variant was still <b>-2.26</b>.</div>
+          </details>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="claim">
+          <details>
+            <summary>“Costs are a detail.”</summary>
+            <div class="evidence">At zero cost the holdout still lost <b>−0.028R</b> per trade. At the modelled cost it lost <b>-0.166R</b>. At three times the modelled cost it lost <b>−0.442R</b>. The sign never changes.</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“The backtest proves it.”</summary>
+            <div class="evidence">The deflated Sharpe ratio is <b>1.14e-23</b> after <b>28</b> trials. The Reality Check and SPA p-values are <b>1.0000</b> and <b>1.0000</b>. The random-entry placebo is not rejected (p = <b>0.7180</b>).</div>
+          </details>
+        </div>
+        <div class="claim">
+          <details>
+            <summary>“It beats the market.”</summary>
+            <div class="evidence">The holdout net Sharpe was <b>-2.79</b>. Buy-and-hold was <b>+1.92</b> on the same window and cost model. The key-level rule was the worst of the five strategies tested.</div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout reveal" style="margin-top:22px">
+      <strong>Why this is useful even though it is negative.</strong> A negative result that is this well documented protects capital. It also leaves behind a reusable filter: pre-registration, a sealed holdout, realistic costs, benchmarks, placebos, and multiple-testing controls. Use it on the next idea before you fund it.
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">The evidence</span>
+      <h2>One screen, every number that matters</h2>
+      <p class="lead-sm">Development is where the rules were built. Validation is the first check. The sealed holdout is the honest test. The result is negative in all three, and the controls agree.</p>
+    </div>
+
+    <div class="chart-grid">
+      <div class="wide reveal"><figure class="chart-figure"><svg class="chart" viewBox="0 0 980 420" role="img" aria-labelledby="equity-title equity-desc" preserveAspectRatio="xMidYMid meet"><title id="equity-title">Equity curves for development, validation, and holdout</title><desc id="equity-desc">All three samples lose money. The holdout ends near zero, confirming the development result instead of reversing it.</desc><line x1="74" y1="340.0" x2="906" y2="340.0" stroke="#dbe4f0" stroke-width="1"/><text x="64.0" y="344.0" text-anchor="end" font-size="10" fill="#64748b">6.3e-05x</text><line x1="74" y1="278.8" x2="906" y2="278.8" stroke="#dbe4f0" stroke-width="1"/><text x="64.0" y="282.8" text-anchor="end" font-size="10" fill="#64748b">0.0006x</text><line x1="74" y1="217.6" x2="906" y2="217.6" stroke="#dbe4f0" stroke-width="1"/><text x="64.0" y="221.6" text-anchor="end" font-size="10" fill="#64748b">0.0058x</text><line x1="74" y1="156.4" x2="906" y2="156.4" stroke="#dbe4f0" stroke-width="1"/><text x="64.0" y="160.4" text-anchor="end" font-size="10" fill="#64748b">0.055x</text><line x1="74" y1="95.2" x2="906" y2="95.2" stroke="#dbe4f0" stroke-width="1"/><text x="64.0" y="99.2" text-anchor="end" font-size="10" fill="#64748b">0.52x</text><line x1="74" y1="34.0" x2="906" y2="34.0" stroke="#dbe4f0" stroke-width="1"/><text x="64.0" y="38.0" text-anchor="end" font-size="10" fill="#64748b">5x</text><polyline points="74.0,77.7 74.2,77.7 74.4,77.7 74.7,77.7 74.9,77.7 75.1,77.7 75.3,77.7 75.5,77.7 75.7,77.7 76.0,77.7 76.2,77.7 76.4,77.7 76.6,77.7 76.8,77.9 77.0,77.9 77.3,77.4 77.5,77.4 77.7,77.4 77.9,77.4 78.1,77.4 78.3,77.4 78.6,77.4 78.8,77.4 79.0,77.4 79.2,77.4 79.4,77.2 79.6,77.3 79.9,77.3 80.1,76.7 80.3,76.7 80.5,76.8 80.7,77.0 80.9,77.5 81.2,77.5 81.4,77.7 81.6,77.7 81.8,77.7 82.0,78.0 82.2,78.0 82.5,78.0 82.7,78.0 82.9,78.2 83.1,78.3 83.3,78.4 83.5,78.4 83.8,78.6 84.0,78.5 84.2,78.7 84.4,78.7 84.6,79.0 84.8,79.0 85.1,79.4 85.3,79.4 85.5,79.5 85.7,79.8 85.9,80.0 86.1,79.3 86.4,78.9 86.6,79.1 86.8,79.1 87.0,79.8 87.2,79.2 87.4,79.2 87.7,79.5 87.9,79.7 88.1,79.6 88.3,79.6 88.5,80.2 88.7,80.2 89.0,80.5 89.2,81.4 89.4,81.4 89.6,81.9 89.8,81.8 90.0,81.9 90.3,82.1 90.5,82.3 90.7,82.5 90.9,82.6 91.1,82.2 91.3,81.6 91.6,81.3 91.8,82.0 92.0,82.3 92.2,81.4 92.4,81.8 92.6,81.9 92.9,82.3 93.1,82.9 93.3,82.2 93.5,81.9 93.7,81.9 93.9,81.7 94.2,81.9 94.4,82.2 94.6,81.3 94.8,81.9 95.0,82.1 95.2,81.9 95.5,81.4 95.7,81.4 95.9,80.1 96.1,80.4 96.3,80.4 96.5,80.4 96.8,80.7 97.0,80.6 97.2,80.6 97.4,80.6 97.6,80.6 97.8,80.5 98.1,80.7 98.3,80.8 98.5,80.8 98.7,81.1 98.9,81.1 99.1,81.6 99.4,81.7 99.6,81.8 99.8,82.0 100.0,81.9 100.2,82.4 100.5,82.8 100.7,82.7 100.9,83.1 101.1,83.3 101.3,83.9 101.5,84.2 101.8,84.0 102.0,84.1 102.2,83.8 102.4,84.2 102.6,83.6 102.8,82.7 103.1,83.0 103.3,83.0 103.5,83.4 103.7,83.6 103.9,83.6 104.1,83.9 104.4,84.1 104.6,84.1 104.8,84.1 105.0,84.4 105.2,84.4 105.4,85.4 105.7,86.0 105.9,86.3 106.1,86.8 106.3,87.1 106.5,87.1 106.7,86.9 107.0,87.2 107.2,87.0 107.4,87.7 107.6,88.2 107.8,88.3 108.0,88.3 108.3,88.7 108.5,89.5 108.7,89.7 108.9,89.6 109.1,90.0 109.3,90.0 109.6,89.8 109.8,90.1 110.0,90.6 110.2,90.8 110.4,90.8 110.6,91.3 110.9,92.8 111.1,93.2 111.3,93.2 111.5,92.9 111.7,92.8 111.9,93.2 112.2,93.5 112.4,94.0 112.6,94.3 112.8,94.3 113.0,93.7 113.2,93.4 113.5,93.4 113.7,93.6 113.9,93.1 114.1,92.4 114.3,91.9 114.5,92.5 114.8,92.7 115.0,92.8 115.2,92.8 115.4,92.2 115.6,92.5 115.8,92.8 116.1,93.4 116.3,92.7 116.5,93.3 116.7,93.2 116.9,93.3 117.1,93.3 117.4,92.9 117.6,93.2 117.8,93.1 118.0,93.2 118.2,93.6 118.4,93.7 118.7,93.7 118.9,94.4 119.1,95.0 119.3,96.2 119.5,96.2 119.7,96.2 120.0,96.0 120.2,96.5 120.4,96.4 120.6,96.6 120.8,96.8 121.0,97.3 121.3,97.8 121.5,97.0 121.7,97.3 121.9,97.0 122.1,96.9 122.3,96.9 122.6,96.4 122.8,96.2 123.0,95.5 123.2,95.2 123.4,95.3 123.6,96.0 123.9,95.5 124.1,96.1 124.3,95.8 124.5,96.0 124.7,95.7 124.9,95.4 125.2,95.6 125.4,96.8 125.6,96.7 125.8,96.1 126.0,96.2 126.3,96.7 126.5,96.7 126.7,97.2 126.9,97.4 127.1,97.4 127.3,98.1 127.6,97.9 127.8,98.0 128.0,98.5 128.2,98.4 128.4,98.8 128.6,98.7 128.9,98.9 129.1,99.2 129.3,98.7 129.5,99.0 129.7,99.0 129.9,99.0 130.2,99.0 130.4,98.8 130.6,98.2 130.8,97.9 131.0,98.3 131.2,98.7 131.5,99.1 131.7,99.8 131.9,100.0 132.1,99.3 132.3,99.2 132.5,100.6 132.8,100.2 133.0,101.0 133.2,101.1 133.4,101.6 133.6,100.6 133.8,100.4 134.1,100.9 134.3,101.3 134.5,101.7 134.7,101.8 134.9,101.6 135.1,101.9 135.4,102.6 135.6,102.6 135.8,102.8 136.0,103.3 136.2,102.8 136.4,102.6 136.7,102.9 136.9,102.9 137.1,103.3 137.3,103.6 137.5,103.9 137.7,104.4 138.0,104.5 138.2,104.7 138.4,104.8 138.6,104.0 138.8,104.1 139.0,104.4 139.3,103.8 139.5,103.9 139.7,104.7 139.9,104.5 140.1,105.1 140.3,105.6 140.6,105.8 140.8,105.0 141.0,105.3 141.2,105.0 141.4,105.3 141.6,105.3 141.9,105.4 142.1,105.6 142.3,105.6 142.5,105.4 142.7,105.4 142.9,106.0 143.2,105.8 143.4,105.4 143.6,105.1 143.8,105.2 144.0,105.8 144.2,105.8 144.5,106.1 144.7,106.6 144.9,107.1 145.1,106.8 145.3,107.4 145.5,107.6 145.8,107.8 146.0,107.8 146.2,107.9 146.4,107.6 146.6,108.2 146.8,107.9 147.1,108.6 147.3,109.2 147.5,110.0 147.7,111.1 147.9,111.2 148.1,111.3 148.4,111.8 148.6,111.7 148.8,111.7 149.0,111.8 149.2,111.4 149.4,111.3 149.7,111.5 149.9,111.7 150.1,111.5 150.3,111.5 150.5,111.5 150.8,111.4 151.0,111.3 151.2,111.7 151.4,111.7 151.6,111.7 151.8,112.0 152.1,112.3 152.3,112.3 152.5,112.5 152.7,112.6 152.9,112.2 153.1,112.4 153.4,112.4 153.6,112.4 153.8,112.7 154.0,113.2 154.2,113.7 154.4,113.2 154.7,113.5 154.9,113.1 155.1,112.9 155.3,112.9 155.5,111.9 155.7,112.1 156.0,111.9 156.2,111.8 156.4,111.9 156.6,112.4 156.8,112.4 157.0,113.0 157.3,113.2 157.5,112.9 157.7,113.2 157.9,114.0 158.1,114.3 158.3,114.5 158.6,114.5 158.8,114.6 159.0,113.5 159.2,113.8 159.4,113.7 159.6,113.7 159.9,113.9 160.1,113.9 160.3,114.1 160.5,114.3 160.7,114.3 160.9,114.7 161.2,115.4 161.4,115.2 161.6,115.7 161.8,115.6 162.0,115.5 162.2,115.6 162.5,116.0 162.7,114.8 162.9,115.3 163.1,115.2 163.3,115.1 163.5,115.1 163.8,114.8 164.0,114.9 164.2,115.0 164.4,115.3 164.6,115.6 164.8,115.4 165.1,115.8 165.3,116.2 165.5,117.0 165.7,117.2 165.9,116.5 166.1,116.6 166.4,117.2 166.6,117.6 166.8,117.4 167.0,117.8 167.2,118.4 167.4,119.0 167.7,119.0 167.9,118.6 168.1,118.0 168.3,118.7 168.5,118.0 168.7,117.8 169.0,118.1 169.2,118.1 169.4,118.0 169.6,117.9 169.8,116.7 170.0,116.7 170.3,117.3 170.5,117.6 170.7,117.6 170.9,117.6 171.1,117.7 171.3,117.6 171.6,117.8 171.8,118.0 172.0,118.9 172.2,118.2 172.4,118.6 172.6,118.1 172.9,118.1 173.1,118.5 173.3,118.0 173.5,117.3 173.7,117.6 173.9,117.1 174.2,117.3 174.4,117.1 174.6,117.3 174.8,118.1 175.0,117.5 175.2,117.4 175.5,117.3 175.7,117.3 175.9,117.3 176.1,118.3 176.3,119.0 176.6,119.2 176.8,118.9 177.0,119.1 177.2,118.8 177.4,119.0 177.6,118.8 177.9,119.6 178.1,119.6 178.3,119.7 178.5,119.9 178.7,120.2 178.9,119.9 179.2,120.1 179.4,119.4 179.6,118.8 179.8,118.9 180.0,119.4 180.2,119.4 180.5,120.1 180.7,119.8 180.9,120.2 181.1,120.4 181.3,120.7 181.5,121.3 181.8,121.7 182.0,121.4 182.2,120.8 182.4,121.3 182.6,120.7 182.8,121.1 183.1,121.3 183.3,121.3 183.5,121.3 183.7,121.4 183.9,121.4 184.1,121.4 184.4,121.6 184.6,121.8 184.8,121.8 185.0,121.9 185.2,122.0 185.4,122.3 185.7,122.5 185.9,122.8 186.1,122.7 186.3,122.7 186.5,122.7 186.7,122.7 187.0,123.0 187.2,123.1 187.4,123.3 187.6,122.6 187.8,122.8 188.0,122.9 188.3,123.6 188.5,123.8 188.7,123.7 188.9,123.7 189.1,123.7 189.3,123.7 189.6,123.4 189.8,123.3 190.0,123.5 190.2,123.9 190.4,123.9 190.6,124.1 190.9,124.2 191.1,124.5 191.3,124.7 191.5,125.5 191.7,125.6 191.9,125.4 192.2,125.8 192.4,124.6 192.6,123.7 192.8,123.3 193.0,123.5 193.2,123.6 193.5,123.1 193.7,123.0 193.9,122.9 194.1,123.2 194.3,123.1 194.5,123.0 194.8,123.7 195.0,123.8 195.2,123.8 195.4,124.0 195.6,124.1 195.8,124.3 196.1,124.2 196.3,123.8 196.5,123.8 196.7,124.1 196.9,124.1 197.1,124.0 197.4,123.6 197.6,123.6 197.8,123.7 198.0,124.1 198.2,124.2 198.4,124.2 198.7,123.7 198.9,124.0 199.1,124.6 199.3,124.8 199.5,125.4 199.7,125.5 200.0,125.7 200.2,126.0 200.4,126.3 200.6,126.7 200.8,126.8 201.0,128.0 201.3,127.8 201.5,127.0 201.7,127.2 201.9,127.4 202.1,129.1 202.4,129.2 202.6,129.2 202.8,129.6 203.0,129.7 203.2,129.6 203.4,129.5 203.7,129.5 203.9,129.7 204.1,129.7 204.3,129.6 204.5,129.8 204.7,130.4 205.0,130.0 205.2,130.5 205.4,130.8 205.6,130.9 205.8,131.3 206.0,131.7 206.3,132.3 206.5,132.7 206.7,131.9 206.9,132.1 207.1,131.8 207.3,131.7 207.6,131.9 207.8,131.2 208.0,131.2 208.2,131.2 208.4,131.4 208.6,131.5 208.9,131.4 209.1,131.8 209.3,131.5 209.5,130.6 209.7,130.7 209.9,130.0 210.2,130.2 210.4,130.3 210.6,131.0 210.8,131.0 211.0,130.9 211.2,131.3 211.5,131.1 211.7,131.1 211.9,131.0 212.1,131.7 212.3,132.9 212.5,132.5 212.8,131.6 213.0,131.2 213.2,131.2 213.4,131.5 213.6,131.7 213.8,131.9 214.1,131.9 214.3,132.6 214.5,132.3 214.7,132.7 214.9,133.2 215.1,133.7 215.4,134.4 215.6,134.9 215.8,135.2 216.0,135.2 216.2,135.7 216.4,135.8 216.7,136.0 216.9,134.8 217.1,135.1 217.3,135.1 217.5,135.3 217.7,135.3 218.0,136.2 218.2,136.6 218.4,137.3 218.6,137.3 218.8,137.9 219.0,138.1 219.3,138.2 219.5,138.7 219.7,138.8 219.9,138.8 220.1,138.8 220.3,138.1 220.6,138.3 220.8,138.3 221.0,139.2 221.2,139.3 221.4,139.4 221.6,140.3 221.9,140.1 222.1,140.1 222.3,140.2 222.5,138.1 222.7,138.1 222.9,138.3 223.2,137.9 223.4,138.6 223.6,138.9 223.8,139.2 224.0,139.2 224.2,139.4 224.5,139.4 224.7,139.4 224.9,139.6 225.1,139.6 225.3,139.7 225.5,139.7 225.8,139.4 226.0,139.3 226.2,139.0 226.4,140.0 226.6,140.2 226.8,140.3 227.1,140.4 227.3,140.7 227.5,141.7 227.7,142.0 227.9,142.2 228.2,141.8 228.4,141.7 228.6,141.4 228.8,142.0 229.0,142.2 229.2,141.8 229.5,141.0 229.7,141.1 229.9,141.0 230.1,141.5 230.3,141.7 230.5,142.0 230.8,142.5 231.0,142.8 231.2,143.0 231.4,143.3 231.6,143.5 231.8,142.5 232.1,141.6 232.3,141.8 232.5,142.3 232.7,142.8 232.9,143.0 233.1,143.1 233.4,142.4 233.6,141.9 233.8,140.6 234.0,140.8 234.2,141.0 234.4,141.1 234.7,141.1 234.9,141.2 235.1,140.5 235.3,140.2 235.5,140.3 235.7,139.8 236.0,140.0 236.2,139.7 236.4,139.8 236.6,140.0 236.8,139.7 237.0,140.0 237.3,140.2 237.5,140.5 237.7,140.7 237.9,141.2 238.1,140.6 238.3,140.8 238.6,141.2 238.8,140.9 239.0,140.6 239.2,140.6 239.4,140.7 239.6,140.7 239.9,140.5 240.1,140.8 240.3,141.0 240.5,141.0 240.7,141.6 240.9,140.9 241.2,141.0 241.4,141.7 241.6,143.3 241.8,143.5 242.0,143.5 242.2,143.7 242.5,143.7 242.7,143.7 242.9,143.7 243.1,143.7 243.3,144.1 243.5,144.1 243.8,144.2 244.0,144.2 244.2,144.2 244.4,144.5 244.6,144.8 244.8,145.1 245.1,145.8 245.3,145.8 245.5,146.2 245.7,146.4 245.9,146.9 246.1,146.5 246.4,147.2 246.6,147.3 246.8,147.7 247.0,147.9 247.2,148.3 247.4,148.7 247.7,148.9 247.9,149.1 248.1,149.0 248.3,148.6 248.5,148.2 248.7,147.2 249.0,147.1 249.2,147.0 249.4,147.4 249.6,147.4 249.8,147.6 250.0,147.0 250.3,145.9 250.5,145.6 250.7,144.9 250.9,145.3 251.1,145.6 251.3,145.2 251.6,144.6 251.8,144.2 252.0,144.2 252.2,144.7 252.4,144.7 252.6,145.0 252.9,145.4 253.1,145.4 253.3,145.6 253.5,145.1 253.7,145.1 254.0,144.8 254.2,144.5 254.4,144.7 254.6,144.6 254.8,144.9 255.0,144.7 255.3,145.0 255.5,145.0 255.7,145.0 255.9,144.8 256.1,144.9 256.3,145.2 256.6,145.5 256.8,145.9 257.0,146.0 257.2,146.3 257.4,146.1 257.6,146.1 257.9,146.3 258.1,146.3 258.3,146.3 258.5,146.4 258.7,146.8 258.9,146.2 259.2,145.7 259.4,146.0 259.6,145.6 259.8,145.5 260.0,145.9 260.2,145.7 260.5,146.1 260.7,146.5 260.9,146.9 261.1,146.9 261.3,146.8 261.5,146.2 261.8,145.9 262.0,146.2 262.2,146.2 262.4,146.3 262.6,146.6 262.8,147.0 263.1,148.1 263.3,148.3 263.5,148.0 263.7,148.4 263.9,148.3 264.1,148.1 264.4,148.1 264.6,148.3 264.8,148.7 265.0,149.4 265.2,149.4 265.4,149.7 265.7,149.7 265.9,150.2 266.1,150.3 266.3,149.7 266.5,149.9 266.7,150.2 267.0,149.7 267.2,150.3 267.4,150.3 267.6,150.4 267.8,150.7 268.0,150.3 268.3,150.3 268.5,150.3 268.7,149.8 268.9,150.3 269.1,150.8 269.3,150.9 269.6,151.2 269.8,151.4 270.0,150.6 270.2,150.3 270.4,150.2 270.6,150.3 270.9,150.4 271.1,150.5 271.3,151.0 271.5,150.9 271.7,151.1 271.9,151.2 272.2,150.8 272.4,150.8 272.6,151.2 272.8,151.6 273.0,150.3 273.2,150.9 273.5,150.5 273.7,150.2 273.9,150.2 274.1,150.6 274.3,150.9 274.5,150.7 274.8,151.0 275.0,151.1 275.2,151.4 275.4,151.7 275.6,151.7 275.8,152.2 276.1,151.7 276.3,151.8 276.5,152.3 276.7,152.4 276.9,152.7 277.1,152.9 277.4,153.2 277.6,153.4 277.8,153.5 278.0,153.6 278.2,153.8 278.5,153.9 278.7,154.2 278.9,154.4 279.1,154.7 279.3,154.8 279.5,155.3 279.8,155.4 280.0,154.9 280.2,154.6 280.4,154.3 280.6,154.7 280.8,154.4 281.1,154.0 281.3,153.5 281.5,153.3 281.7,154.4 281.9,154.5 282.1,154.6 282.4,154.1 282.6,154.3 282.8,154.1 283.0,154.0 283.2,154.3 283.4,154.6 283.7,154.5 283.9,155.0 284.1,154.8 284.3,155.5 284.5,155.9 284.7,155.6 285.0,155.6 285.2,155.8 285.4,155.7 285.6,155.6 285.8,155.7 286.0,156.8 286.3,156.0 286.5,156.2 286.7,156.2 286.9,156.2 287.1,156.5 287.3,156.2 287.6,156.1 287.8,156.4 288.0,156.5 288.2,156.6 288.4,156.9 288.6,157.3 288.9,157.7 289.1,157.0 289.3,157.3 289.5,157.4 289.7,157.4 289.9,158.1 290.2,157.8 290.4,158.5 290.6,158.2 290.8,158.4 291.0,158.2 291.2,158.2 291.5,158.0 291.7,158.2 291.9,157.8 292.1,158.1 292.3,159.1 292.5,159.6 292.8,159.5 293.0,159.4 293.2,159.8 293.4,159.3 293.6,159.9 293.8,160.4 294.1,160.2 294.3,160.6 294.5,160.1 294.7,159.7 294.9,159.8 295.1,159.6 295.4,159.6 295.6,160.1 295.8,160.2 296.0,161.1 296.2,161.2 296.4,161.3 296.7,161.4 296.9,161.7 297.1,161.9 297.3,162.1 297.5,162.8 297.7,163.4 298.0,163.4 298.2,163.8 298.4,164.1 298.6,164.2 298.8,164.9 299.0,165.4 299.3,165.7 299.5,165.7 299.7,165.8 299.9,165.6 300.1,166.0 300.3,165.9 300.6,165.9 300.8,166.3 301.0,166.1 301.2,166.0 301.4,166.5 301.6,166.3 301.9,167.4 302.1,168.5 302.3,167.8 302.5,167.1 302.7,167.1 302.9,167.3 303.2,167.6 303.4,167.9 303.6,167.6 303.8,167.6 304.0,167.6 304.3,168.1 304.5,168.3 304.7,167.6 304.9,167.4 305.1,167.4 305.3,167.8 305.6,168.7 305.8,168.0 306.0,167.7 306.2,166.6 306.4,167.0 306.6,167.1 306.9,166.8 307.1,166.8 307.3,167.0 307.5,167.2 307.7,167.3 307.9,167.8 308.2,168.3 308.4,168.8 308.6,168.8 308.8,169.3 309.0,169.8 309.2,170.0 309.5,170.8 309.7,171.0 309.9,171.8 310.1,172.2 310.3,172.4 310.5,173.0 310.8,173.9 311.0,174.2 311.2,174.2 311.4,174.2 311.6,174.8 311.8,175.3 312.1,174.5 312.3,174.4 312.5,174.2 312.7,174.6 312.9,174.7 313.1,174.0 313.4,173.7 313.6,174.0 313.8,174.4 314.0,174.0 314.2,175.0 314.4,175.1 314.7,175.0 314.9,174.4 315.1,174.3 315.3,174.1 315.5,174.5 315.7,174.7 316.0,174.3 316.2,174.7 316.4,175.1 316.6,175.8 316.8,176.0 317.0,175.5 317.3,174.9 317.5,175.5 317.7,176.7 317.9,177.1 318.1,177.0 318.3,176.4 318.6,176.7 318.8,175.2 319.0,174.8 319.2,174.0 319.4,173.8 319.6,173.8 319.9,173.1 320.1,174.3 320.3,174.7 320.5,175.7 320.7,176.4 320.9,176.8 321.2,177.1 321.4,177.3 321.6,177.7 321.8,177.9 322.0,178.5 322.2,179.1 322.5,179.3 322.7,180.3 322.9,180.8 323.1,180.8 323.3,180.1 323.5,180.3 323.8,181.0 324.0,180.7 324.2,181.1 324.4,181.3 324.6,181.8 324.8,182.2 325.1,181.1 325.3,181.7 325.5,182.0 325.7,182.5 325.9,183.3 326.1,183.7 326.4,184.1 326.6,184.7 326.8,185.0 327.0,185.4 327.2,185.2 327.4,185.1 327.7,185.2 327.9,185.0 328.1,185.1 328.3,184.7 328.5,185.7 328.7,185.2 329.0,185.9 329.2,185.4 329.4,185.4 329.6,186.0 329.8,185.8 330.1,186.0 330.3,186.7 330.5,186.7 330.7,186.1 330.9,186.5 331.1,187.0 331.4,187.3 331.6,187.1 331.8,187.8 332.0,188.2 332.2,188.0 332.4,188.5 332.7,188.7 332.9,188.7 333.1,188.9 333.3,189.3 333.5,187.8 333.7,187.9 334.0,188.1 334.2,187.2 334.4,186.4 334.6,186.4 334.8,186.9 335.0,187.6 335.3,187.2 335.5,185.4 335.7,185.6 335.9,184.9 336.1,184.9 336.3,185.1 336.6,185.0 336.8,184.5 337.0,183.9 337.2,183.9 337.4,183.0 337.6,183.0 337.9,183.2 338.1,182.5 338.3,182.9 338.5,183.0 338.7,183.3 338.9,183.6 339.2,183.5 339.4,184.7 339.6,185.1 339.8,185.6 340.0,185.0 340.2,184.5 340.5,184.8 340.7,184.6 340.9,184.1 341.1,184.0 341.3,184.6 341.5,184.6 341.8,185.2 342.0,185.4 342.2,185.7 342.4,186.0 342.6,185.9 342.8,185.5 343.1,184.6 343.3,185.0 343.5,185.3 343.7,185.2 343.9,185.9 344.1,185.3 344.4,185.8 344.6,185.5 344.8,186.0 345.0,186.6 345.2,186.7 345.4,187.2 345.7,186.8 345.9,187.4 346.1,187.9 346.3,187.9 346.5,188.3 346.7,188.4 347.0,188.7 347.2,189.0 347.4,189.9 347.6,189.6 347.8,189.8 348.0,189.7 348.3,189.4 348.5,190.0 348.7,189.4 348.9,187.2 349.1,187.2 349.3,187.1 349.6,187.4 349.8,187.6 350.0,187.7 350.2,188.0 350.4,188.0 350.6,188.8 350.9,188.9 351.1,188.8 351.3,189.0 351.5,189.4 351.7,189.8 351.9,190.0 352.2,190.2 352.4,190.4 352.6,189.0 352.8,187.9 353.0,188.2 353.2,188.0 353.5,188.5 353.7,188.8 353.9,188.9 354.1,188.6 354.3,189.5 354.5,189.5 354.8,189.4 355.0,188.8 355.2,188.6 355.4,187.8 355.6,187.5 355.9,187.5 356.1,187.7 356.3,187.0 356.5,187.5 356.7,186.7 356.9,187.2 357.2,187.8 357.4,188.3 357.6,189.2 357.8,189.4 358.0,189.8 358.2,191.3 358.5,190.8 358.7,191.0 358.9,191.9 359.1,192.1 359.3,192.2 359.5,191.9 359.8,192.6 360.0,192.5 360.2,192.3 360.4,191.5 360.6,192.1 360.8,191.4 361.1,191.4 361.3,192.0 361.5,192.2 361.7,192.8 361.9,193.4 362.1,193.4 362.4,194.3 362.6,193.8 362.8,192.8 363.0,192.8 363.2,193.7 363.4,194.0 363.7,195.1 363.9,195.1 364.1,195.2 364.3,196.5 364.5,196.8 364.7,196.8 365.0,196.6 365.2,195.4 365.4,195.7 365.6,195.9 365.8,195.7 366.0,195.3 366.3,194.9 366.5,194.4 366.7,193.5 366.9,194.5 367.1,194.3 367.3,194.2 367.6,194.2 367.8,194.2 368.0,194.2 368.2,194.5 368.4,194.8 368.6,194.9 368.9,194.3 369.1,194.6 369.3,194.6 369.5,194.4 369.7,194.6 369.9,195.4 370.2,195.0 370.4,195.4 370.6,194.8 370.8,195.5 371.0,195.2 371.2,195.3 371.5,194.7 371.7,195.3 371.9,195.6 372.1,195.7 372.3,195.7 372.5,196.2 372.8,195.6 373.0,196.1 373.2,196.1 373.4,195.9 373.6,195.9 373.8,196.6 374.1,197.3 374.3,197.5 374.5,197.2 374.7,197.2 374.9,197.7 375.1,197.9 375.4,197.6 375.6,198.0 375.8,197.9 376.0,197.2 376.2,196.5 376.4,196.8 376.7,196.8 376.9,196.8 377.1,197.2 377.3,197.7 377.5,197.6 377.7,197.4 378.0,196.9 378.2,197.1 378.4,197.4 378.6,197.5 378.8,196.4 379.0,197.6 379.3,197.4 379.5,198.3 379.7,198.3 379.9,198.7 380.1,199.7 380.3,199.8 380.6,199.3 380.8,199.5 381.0,199.8 381.2,200.1 381.4,200.5 381.7,201.0 381.9,200.6 382.1,200.4 382.3,200.3 382.5,200.3 382.7,200.3 383.0,200.0 383.2,200.3 383.4,200.7 383.6,200.5 383.8,200.6 384.0,200.9 384.3,201.0 384.5,200.4 384.7,200.3 384.9,199.8 385.1,200.4 385.3,200.6 385.6,201.0 385.8,202.0 386.0,202.3 386.2,202.5 386.4,203.3 386.6,203.5 386.9,203.3 387.1,204.3 387.3,203.8 387.5,203.6 387.7,203.5 387.9,203.9 388.2,204.0 388.4,204.2 388.6,204.4 388.8,204.3 389.0,204.5 389.2,204.8 389.5,204.4 389.7,204.8 389.9,205.1 390.1,205.1 390.3,204.8 390.5,205.0 390.8,205.1 391.0,205.9 391.2,205.7 391.4,205.7 391.6,206.3 391.8,206.6 392.1,206.8 392.3,206.9 392.5,206.9 392.7,207.0 392.9,207.0 393.1,207.1 393.4,207.1 393.6,207.0 393.8,207.1 394.0,208.1 394.2,208.1 394.4,208.8 394.7,208.4 394.9,208.6 395.1,209.6 395.3,209.6 395.5,209.5 395.7,208.8 396.0,209.1 396.2,209.7 396.4,209.6 396.6,209.6 396.8,209.2 397.0,209.0 397.3,209.3 397.5,209.5 397.7,209.8 397.9,209.8 398.1,210.4 398.3,211.0 398.6,211.0 398.8,210.6 399.0,211.1 399.2,211.0 399.4,211.1 399.6,211.4 399.9,211.9 400.1,211.9 400.3,212.0 400.5,212.5 400.7,212.6 400.9,212.0 401.2,212.3 401.4,211.9 401.6,211.5 401.8,211.5 402.0,212.0 402.2,212.2 402.5,212.7 402.7,213.1 402.9,212.5 403.1,212.8 403.3,213.0 403.5,214.0 403.8,214.5 404.0,214.5 404.2,214.7 404.4,215.3 404.6,215.2 404.8,215.0 405.1,214.9 405.3,215.1 405.5,215.2 405.7,215.5 405.9,216.0 406.2,216.5 406.4,216.5 406.6,216.6 406.8,217.1 407.0,218.3 407.2,218.6 407.5,218.6 407.7,219.1 407.9,219.2 408.1,219.5 408.3,220.0 408.5,220.1 408.8,220.5 409.0,221.1 409.2,221.4 409.4,222.5 409.6,223.1 409.8,222.5 410.1,222.8 410.3,223.2 410.5,223.7 410.7,224.3 410.9,223.3 411.1,223.3 411.4,223.6 411.6,223.6 411.8,223.6 412.0,223.6 412.2,223.1 412.4,223.1 412.7,222.9 412.9,222.7 413.1,222.3 413.3,221.6 413.5,221.8 413.7,221.7 414.0,221.9 414.2,221.2 414.4,221.6 414.6,221.8 414.8,221.6 415.0,221.6 415.3,222.4 415.5,222.5 415.7,222.0 415.9,221.2 416.1,221.3 416.3,221.2 416.6,221.3 416.8,221.9 417.0,222.1 417.2,220.9 417.4,221.0 417.6,221.4 417.9,221.4 418.1,221.1 418.3,221.1 418.5,221.4 418.7,221.2 418.9,221.4 419.2,222.0 419.4,221.2 419.6,221.4 419.8,221.6 420.0,222.2 420.2,222.4 420.5,222.7 420.7,221.4 420.9,222.6 421.1,223.1 421.3,222.2 421.5,221.8 421.8,221.6 422.0,222.2 422.2,222.2 422.4,222.3 422.6,221.8 422.8,222.3 423.1,222.6 423.3,222.8 423.5,222.9 423.7,223.9 423.9,224.0 424.1,224.1 424.4,224.8 424.6,225.0 424.8,224.7 425.0,225.6 425.2,226.0 425.4,225.4 425.7,225.2 425.9,225.6 426.1,225.6 426.3,225.7 426.5,225.5 426.7,225.8 427.0,225.7 427.2,226.5 427.4,226.5 427.6,226.6 427.8,227.5 428.0,227.5 428.3,227.7 428.5,228.0 428.7,229.0 428.9,228.8 429.1,228.2 429.3,229.8 429.6,230.9 429.8,230.6 430.0,230.5 430.2,230.3 430.4,228.5 430.6,228.4 430.9,227.6 431.1,226.9 431.3,226.3 431.5,227.1 431.7,227.5 432.0,227.1 432.2,227.2 432.4,227.7 432.6,228.5 432.8,228.9 433.0,229.1 433.3,230.0 433.5,230.0 433.7,230.3 433.9,230.6 434.1,231.1 434.3,229.9 434.6,231.0 434.8,230.9 435.0,231.7 435.2,231.5 435.4,231.7 435.6,231.3 435.9,230.4 436.1,230.3 436.3,230.1 436.5,230.5 436.7,231.2 436.9,231.5 437.2,231.7 437.4,231.1 437.6,230.4 437.8,230.1 438.0,231.1 438.2,231.3 438.5,231.3 438.7,231.3 438.9,231.4 439.1,231.3 439.3,231.0 439.5,231.2 439.8,231.5 440.0,231.4 440.2,230.7 440.4,231.5 440.6,231.4 440.8,232.3 441.1,231.8 441.3,231.2 441.5,231.6 441.7,232.2 441.9,232.5 442.1,232.4 442.4,232.6 442.6,232.6 442.8,232.6 443.0,233.6 443.2,233.6 443.4,233.4 443.7,233.1 443.9,232.6 444.1,232.8 444.3,232.9 444.5,232.7 444.7,233.0 445.0,233.0 445.2,233.4 445.4,233.6 445.6,234.9 445.8,235.2 446.0,235.5 446.3,235.2 446.5,236.1 446.7,236.7 446.9,236.8 447.1,237.3 447.3,237.5 447.6,237.4 447.8,238.6 448.0,238.4 448.2,238.5 448.4,239.4 448.6,238.9 448.9,239.4 449.1,239.9 449.3,239.6 449.5,238.8 449.7,238.9 449.9,239.4 450.2,239.1 450.4,238.9 450.6,238.1 450.8,238.2 451.0,238.3 451.2,239.2 451.5,238.6 451.7,238.5 451.9,237.6 452.1,238.2 452.3,239.2 452.5,238.5 452.8,239.2 453.0,239.5 453.2,239.2 453.4,240.0 453.6,240.0 453.8,240.3 454.1,240.4 454.3,240.7 454.5,240.7 454.7,241.6 454.9,241.5 455.1,241.8 455.4,240.5 455.6,240.7 455.8,241.2 456.0,241.3 456.2,240.6 456.4,241.2 456.7,241.2 456.9,241.1 457.1,240.9 457.3,241.2 457.5,241.2 457.8,242.3 458.0,241.3 458.2,241.9 458.4,242.9 458.6,244.0 458.8,244.1 459.1,244.9 459.3,243.8 459.5,242.9 459.7,243.5 459.9,243.6 460.1,243.6 460.4,244.5 460.6,244.5 460.8,244.1 461.0,244.3 461.2,242.7 461.4,243.3 461.7,243.2 461.9,243.1 462.1,243.6 462.3,244.0 462.5,243.8 462.7,243.9 463.0,244.4 463.2,245.0 463.4,246.3 463.6,247.2 463.8,247.9 464.0,247.7 464.3,247.8 464.5,247.9 464.7,249.0 464.9,249.7 465.1,250.4 465.3,250.1 465.6,250.6 465.8,251.3 466.0,252.1 466.2,252.9 466.4,253.4 466.6,254.2 466.9,254.0 467.1,254.6 467.3,255.5 467.5,254.6 467.7,254.7 467.9,255.0 468.2,254.4 468.4,253.1 468.6,254.0 468.8,253.6 469.0,254.0 469.2,254.7 469.5,254.8 469.7,254.7 469.9,255.1 470.1,255.7 470.3,255.6 470.5,255.8 470.8,257.0 471.0,256.3 471.2,256.0 471.4,256.4 471.6,256.8 471.8,256.0 472.1,256.1 472.3,256.0 472.5,256.6 472.7,257.5 472.9,257.5 473.1,257.7 473.4,258.2 473.6,258.5 473.8,258.4 474.0,258.5 474.2,258.5 474.4,258.5 474.7,257.8 474.9,257.8 475.1,258.9 475.3,258.6 475.5,257.9 475.7,257.4 476.0,257.2 476.2,257.8 476.4,258.1 476.6,258.6 476.8,258.3 477.0,258.9 477.3,259.3 477.5,259.0 477.7,258.2 477.9,257.9 478.1,258.1 478.3,257.8 478.6,258.3 478.8,259.0 479.0,258.8 479.2,259.6 479.4,259.3 479.6,258.9 479.9,257.3 480.1,258.0 480.3,256.7 480.5,257.8 480.7,259.1 480.9,259.2 481.2,258.0 481.4,257.5 481.6,257.9 481.8,257.7 482.0,257.0 482.2,257.0 482.5,257.2 482.7,255.9 482.9,256.1 483.1,256.7 483.3,258.1 483.6,258.7 483.8,259.5 484.0,259.8 484.2,260.4 484.4,260.4 484.6,261.1 484.9,261.8 485.1,262.3 485.3,262.6 485.5,262.3 485.7,262.6 485.9,262.9 486.2,263.3 486.4,263.4 486.6,263.6 486.8,263.7 487.0,263.9 487.2,264.2 487.5,263.8 487.7,263.5 487.9,263.7 488.1,263.9 488.3,264.2 488.5,264.1 488.8,264.7 489.0,265.4 489.2,265.8 489.4,266.3 489.6,265.0 489.8,264.4 490.1,264.6 490.3,265.6 490.5,266.0 490.7,266.8 490.9,267.6 491.1,268.1 491.4,267.8 491.6,268.8 491.8,269.0 492.0,268.5 492.2,268.2 492.4,268.2 492.7,268.6 492.9,268.6 493.1,268.3 493.3,268.7 493.5,269.0 493.7,269.9 494.0,270.5 494.2,270.9 494.4,271.6 494.6,270.9 494.8,271.4 495.0,271.3 495.3,271.8 495.5,272.9 495.7,272.0 495.9,271.9 496.1,272.3 496.3,272.4 496.6,272.6 496.8,272.8 497.0,272.6 497.2,273.2 497.4,273.5 497.6,273.2 497.9,274.0 498.1,273.8 498.3,274.1 498.5,273.1 498.7,273.3 498.9,274.2 499.2,274.3 499.4,273.2 499.6,274.3 499.8,274.5 500.0,274.7 500.2,275.0 500.5,275.5 500.7,276.1 500.9,275.7 501.1,275.8 501.3,275.9 501.5,275.8 501.8,275.2 502.0,275.5 502.2,275.7 502.4,276.0 502.6,276.5 502.8,276.8 503.1,277.1 503.3,277.1 503.5,276.7 503.7,277.4 503.9,278.2 504.1,278.3 504.4,278.2 504.6,279.0 504.8,279.2 505.0,279.2 505.2,278.8 505.4,279.3 505.7,279.2 505.9,279.4 506.1,279.5 506.3,279.4 506.5,279.4 506.7,280.0 507.0,280.1 507.2,280.2 507.4,280.1 507.6,280.1 507.8,280.2 508.0,280.2 508.3,280.7 508.5,280.9 508.7,281.0 508.9,281.2 509.1,281.8 509.4,281.6 509.6,281.5 509.8,282.3 510.0,282.8 510.2,283.0 510.4,283.0 510.7,283.2 510.9,283.5 511.1,283.5 511.3,284.1 511.5,284.4 511.7,284.6 512.0,284.7 512.2,285.1 512.4,284.7 512.6,285.2 512.8,285.3 513.0,285.6 513.3,285.9 513.5,286.1 513.7,285.8 513.9,286.3 514.1,286.5 514.3,286.6 514.6,285.7 514.8,286.2 515.0,286.5 515.2,285.9 515.4,286.7 515.6,287.6 515.9,287.9 516.1,287.3 516.3,287.0 516.5,287.1 516.7,287.3 516.9,288.0 517.2,289.3 517.4,289.3 517.6,289.8 517.8,290.2 518.0,290.4 518.2,290.6 518.5,290.5 518.7,290.8 518.9,289.7 519.1,290.2 519.3,290.4 519.5,290.7 519.8,289.9 520.0,290.0 520.2,290.7 520.4,291.3 520.6,291.4 520.8,291.7 521.1,291.7 521.3,291.7 521.5,292.0 521.7,292.1 521.9,292.4 522.1,292.8 522.4,293.5 522.6,293.4 522.8,293.5 523.0,293.4 523.2,294.1 523.4,294.8 523.7,295.0 523.9,295.1 524.1,295.2 524.3,295.5 524.5,295.8 524.7,295.7 525.0,295.7 525.2,296.1 525.4,296.6 525.6,297.0 525.8,297.1 526.0,297.3 526.3,297.3 526.5,297.3" fill="none" stroke="#d79b2b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="526.5" cy="297.3" r="4" fill="#d79b2b" stroke="#fff" stroke-width="1.5"/><text x="300.2" y="364.0" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">Development</text><polyline points="546.5,77.7 546.7,77.7 546.9,76.3 547.1,76.7 547.3,76.8 547.6,76.3 547.8,77.0 548.0,76.8 548.2,77.0 548.4,76.8 548.6,77.5 548.9,78.3 549.1,78.3 549.3,78.4 549.5,78.6 549.7,78.8 549.9,79.3 550.2,79.1 550.4,78.8 550.6,79.2 550.8,79.2 551.0,79.6 551.2,79.6 551.5,79.1 551.7,79.4 551.9,79.7 552.1,79.5 552.3,79.5 552.5,79.1 552.8,79.1 553.0,79.3 553.2,79.8 553.4,79.4 553.6,79.4 553.8,79.6 554.1,79.6 554.3,79.7 554.5,79.7 554.7,80.1 554.9,79.6 555.2,80.7 555.4,80.2 555.6,78.6 555.8,77.6 556.0,77.9 556.2,77.3 556.5,77.8 556.7,77.4 556.9,77.2 557.1,76.7 557.3,77.2 557.5,76.8 557.8,76.9 558.0,76.4 558.2,76.4 558.4,76.5 558.6,75.6 558.8,76.3 559.1,76.1 559.3,76.7 559.5,77.7 559.7,78.2 559.9,79.1 560.1,79.3 560.4,78.7 560.6,78.5 560.8,78.8 561.0,79.2 561.2,79.3 561.4,79.2 561.7,80.2 561.9,79.1 562.1,79.0 562.3,78.6 562.5,77.8 562.7,77.2 563.0,77.7 563.2,77.0 563.4,76.9 563.6,77.2 563.8,77.5 564.0,77.8 564.3,77.9 564.5,77.3 564.7,77.2 564.9,77.1 565.1,77.3 565.3,78.3 565.6,79.0 565.8,79.2 566.0,79.7 566.2,79.4 566.4,79.3 566.6,79.4 566.9,80.0 567.1,80.3 567.3,80.5 567.5,80.7 567.7,79.8 567.9,79.9 568.2,80.1 568.4,80.2 568.6,80.8 568.8,80.8 569.0,80.8 569.2,81.6 569.5,81.6 569.7,81.9 569.9,81.9 570.1,81.9 570.3,80.8 570.5,81.0 570.8,80.3 571.0,80.0 571.2,80.4 571.4,81.3 571.6,82.8 571.8,84.1 572.1,82.9 572.3,82.8 572.5,81.4 572.7,81.9 572.9,81.6 573.1,81.7 573.4,82.3 573.6,83.1 573.8,83.6 574.0,84.0 574.2,84.6 574.4,85.2 574.7,85.5 574.9,85.9 575.1,85.9 575.3,84.6 575.5,84.7 575.7,85.6 576.0,85.8 576.2,84.6 576.4,84.9 576.6,86.1 576.8,85.6 577.0,85.4 577.3,85.2 577.5,85.6 577.7,85.7 577.9,86.0 578.1,86.0 578.3,85.5 578.6,84.1 578.8,84.1 579.0,84.2 579.2,84.8 579.4,83.8 579.7,83.4 579.9,83.9 580.1,84.1 580.3,84.8 580.5,85.3 580.7,85.3 581.0,85.2 581.2,85.1 581.4,84.5 581.6,84.4 581.8,85.1 582.0,84.6 582.3,84.7 582.5,85.3 582.7,85.2 582.9,85.9 583.1,86.0 583.3,86.2 583.6,86.5 583.8,86.7 584.0,86.0 584.2,85.6 584.4,86.1 584.6,86.8 584.9,86.8 585.1,86.4 585.3,85.6 585.5,85.7 585.7,85.7 585.9,85.8 586.2,86.3 586.4,86.7 586.6,86.8 586.8,86.7 587.0,86.8 587.2,86.9 587.5,87.3 587.7,87.2 587.9,87.2 588.1,87.7 588.3,86.9 588.5,87.3 588.8,87.9 589.0,88.2 589.2,87.9 589.4,88.5 589.6,88.1 589.8,88.4 590.1,88.0 590.3,87.9 590.5,87.3 590.7,87.8 590.9,88.6 591.1,88.5 591.4,88.3 591.6,88.6 591.8,88.2 592.0,88.4 592.2,88.8 592.4,89.5 592.7,89.9 592.9,90.2 593.1,90.6 593.3,91.1 593.5,90.8 593.7,91.1 594.0,91.6 594.2,92.6 594.4,93.8 594.6,93.3 594.8,93.4 595.0,93.8 595.3,94.8 595.5,93.8 595.7,94.0 595.9,93.8 596.1,94.4 596.3,93.8 596.6,94.5 596.8,95.5 597.0,95.8 597.2,95.9 597.4,95.8 597.6,96.3 597.9,96.8 598.1,96.5 598.3,96.5 598.5,96.5 598.7,96.5 598.9,96.5 599.2,96.5 599.4,96.4 599.6,96.4 599.8,96.6 600.0,96.2 600.2,96.5 600.5,96.5 600.7,96.3 600.9,96.0 601.1,96.0 601.3,96.0 601.5,95.0 601.8,95.0 602.0,95.0 602.2,95.0 602.4,95.0 602.6,95.3 602.8,95.3 603.1,95.4 603.3,95.4 603.5,95.4 603.7,95.5 603.9,95.2 604.1,95.2 604.4,95.2 604.6,95.3 604.8,95.6 605.0,95.4 605.2,95.4 605.5,95.5 605.7,95.5 605.9,95.5 606.1,95.3 606.3,95.5 606.5,95.7 606.8,95.5 607.0,96.0 607.2,96.2 607.4,96.6 607.6,96.8 607.8,97.2 608.1,98.1 608.3,98.1 608.5,98.9 608.7,98.6 608.9,98.7 609.1,98.7 609.4,99.1 609.6,99.7 609.8,100.0 610.0,100.2 610.2,99.7 610.4,99.7 610.7,99.8 610.9,100.5 611.1,100.7 611.3,100.8 611.5,100.8 611.7,101.4 612.0,101.4 612.2,100.6 612.4,100.4 612.6,100.4 612.8,100.3 613.0,100.6 613.3,101.0 613.5,99.7 613.7,100.0 613.9,100.4 614.1,100.7 614.3,100.8 614.6,101.1 614.8,101.2 615.0,101.3 615.2,101.5 615.4,102.0 615.6,101.9 615.9,101.5 616.1,101.8 616.3,101.9 616.5,102.1 616.7,101.6 616.9,100.5 617.2,100.2 617.4,100.6 617.6,100.8 617.8,99.5 618.0,100.1 618.2,100.9 618.5,98.3 618.7,97.8 618.9,97.7 619.1,97.8 619.3,97.6 619.5,97.3 619.8,96.6 620.0,96.4 620.2,97.0 620.4,96.1 620.6,96.2 620.8,95.7 621.1,95.6 621.3,95.7 621.5,95.8 621.7,96.2 621.9,96.3 622.1,95.8 622.4,95.5 622.6,95.6 622.8,95.6 623.0,95.7 623.2,96.1 623.4,96.5 623.7,96.5 623.9,96.8 624.1,97.3 624.3,98.1 624.5,98.1 624.7,98.1 625.0,97.5 625.2,97.6 625.4,97.2 625.6,97.0 625.8,97.0 626.0,96.1 626.3,96.4 626.5,96.4 626.7,96.4 626.9,96.5 627.1,96.4 627.3,96.4 627.6,96.8 627.8,96.8 628.0,96.8 628.2,96.7 628.4,97.0 628.6,97.1 628.9,96.2 629.1,97.0 629.3,96.9 629.5,95.5 629.7,96.3 629.9,97.0 630.2,97.6 630.4,98.6 630.6,99.2 630.8,99.4 631.0,99.4 631.3,99.0 631.5,99.5 631.7,99.0 631.9,99.5 632.1,100.1 632.3,99.9 632.6,100.3 632.8,100.8 633.0,101.3 633.2,102.1 633.4,102.1 633.6,102.8 633.9,103.1 634.1,104.0 634.3,103.2 634.5,103.1 634.7,103.3 634.9,103.4 635.2,103.1 635.4,103.0 635.6,103.1 635.8,103.4 636.0,104.0 636.2,104.5 636.5,105.2 636.7,105.5 636.9,106.0 637.1,105.3 637.3,105.4 637.5,105.6 637.8,105.7 638.0,105.9 638.2,105.5 638.4,105.6 638.6,106.2 638.8,106.0 639.1,104.8 639.3,105.4 639.5,105.9 639.7,106.6 639.9,107.3 640.1,107.5 640.4,107.7 640.6,107.4 640.8,108.1 641.0,108.3 641.2,108.1 641.4,107.6 641.7,108.3 641.9,109.3 642.1,109.7 642.3,111.0 642.5,111.0 642.7,111.1 643.0,110.9 643.2,110.6 643.4,109.7 643.6,108.9 643.8,109.8 644.0,110.1 644.3,110.8 644.5,111.3 644.7,111.0 644.9,111.2 645.1,111.6 645.3,110.5 645.6,110.6 645.8,111.0 646.0,110.8 646.2,111.0 646.4,111.5 646.6,110.9 646.9,110.6 647.1,110.4 647.3,110.6 647.5,110.5 647.7,110.0 647.9,110.5 648.2,110.9 648.4,110.9 648.6,110.9 648.8,111.1 649.0,110.1 649.2,109.9 649.5,109.9 649.7,110.2 649.9,110.2 650.1,110.3 650.3,110.3 650.5,109.3 650.8,109.6 651.0,108.3 651.2,108.6 651.4,109.1 651.6,109.6 651.8,109.7 652.1,109.8 652.3,110.3 652.5,110.0 652.7,109.5 652.9,109.7 653.1,109.8 653.4,110.1 653.6,110.2 653.8,109.9 654.0,110.4 654.2,110.9 654.4,110.9 654.7,111.9 654.9,112.0 655.1,112.1 655.3,111.7 655.5,111.4 655.7,112.7 656.0,112.6 656.2,113.1 656.4,113.1 656.6,112.8 656.8,112.9 657.1,113.2 657.3,113.3 657.5,113.3 657.7,113.2 657.9,113.2 658.1,112.8 658.4,112.9 658.6,112.8 658.8,113.1 659.0,113.3 659.2,114.1 659.4,114.3 659.7,114.5 659.9,113.8 660.1,114.6 660.3,114.8 660.5,115.2 660.7,115.4 661.0,115.4 661.2,115.3 661.4,115.4 661.6,114.7 661.8,115.6 662.0,116.2 662.3,116.1 662.5,115.9 662.7,116.4 662.9,115.9 663.1,116.3 663.3,116.7 663.6,117.6 663.8,117.9 664.0,115.9 664.2,117.0 664.4,116.8 664.6,117.6 664.9,117.5 665.1,118.2 665.3,119.1 665.5,118.7 665.7,119.0 665.9,119.6 666.2,120.3 666.4,120.7 666.6,120.4 666.8,121.3 667.0,121.5 667.2,121.5 667.5,121.2 667.7,120.9 667.9,121.7 668.1,121.2 668.3,121.4 668.5,121.8 668.8,122.5 669.0,122.2 669.2,121.2 669.4,120.1 669.6,118.7 669.8,118.6 670.1,119.4 670.3,120.5 670.5,120.0 670.7,119.7 670.9,118.8 671.1,119.7 671.4,120.8 671.6,121.3 671.8,121.5 672.0,121.4 672.2,118.8 672.4,119.6 672.7,119.4 672.9,119.4 673.1,118.0 673.3,118.1 673.5,117.9 673.7,118.5 674.0,118.6 674.2,119.2 674.4,118.2 674.6,118.9 674.8,119.5 675.0,119.7 675.3,119.5 675.5,119.3 675.7,118.7 675.9,118.9 676.1,119.1 676.3,118.3 676.6,118.9 676.8,119.4 677.0,119.5 677.2,120.0 677.4,119.9 677.6,120.2 677.9,119.9 678.1,120.1 678.3,121.3 678.5,121.4 678.7,122.4 678.9,123.0 679.2,123.4 679.4,123.8 679.6,123.8 679.8,124.3 680.0,123.9 680.2,124.2 680.5,123.9 680.7,124.2 680.9,124.4 681.1,124.7 681.3,124.6 681.5,123.6 681.8,123.3 682.0,123.6 682.2,123.6 682.4,123.8 682.6,124.3 682.9,124.6 683.1,125.3 683.3,125.8 683.5,125.9 683.7,125.6 683.9,125.5 684.2,125.7 684.4,125.3 684.6,126.1 684.8,126.5 685.0,125.7 685.2,125.8 685.5,126.5 685.7,126.0 685.9,126.7 686.1,127.3 686.3,127.0 686.5,127.2 686.8,127.3 687.0,126.6 687.2,128.2 687.4,128.4 687.6,128.5 687.8,128.7 688.1,128.7 688.3,129.3 688.5,129.3 688.7,128.9 688.9,129.1 689.1,129.2 689.4,130.1 689.6,130.0 689.8,130.9 690.0,131.0 690.2,131.0 690.4,131.0 690.7,130.8 690.9,131.7 691.1,131.4 691.3,131.3 691.5,131.0 691.7,131.3 692.0,131.9 692.2,132.1 692.4,132.2 692.6,132.5 692.8,132.9 693.0,133.1 693.3,133.9 693.5,134.0 693.7,134.8 693.9,134.8 694.1,134.9 694.3,135.2 694.6,135.5 694.8,135.2 695.0,136.0 695.2,136.6 695.4,136.2 695.6,135.8 695.9,136.0 696.1,136.1 696.3,135.8 696.5,135.8 696.7,136.2 696.9,135.9 697.2,135.8 697.4,135.8 697.6,136.7 697.8,136.3 698.0,136.3 698.2,136.7 698.5,136.9 698.7,137.1 698.9,137.3 699.1,136.8 699.3,137.5 699.5,137.4 699.8,136.7 700.0,136.8 700.2,137.1 700.4,137.6 700.6,138.0 700.8,138.3 701.1,138.1 701.3,138.5 701.5,138.7 701.7,138.7 701.9,138.4 702.1,138.4 702.4,138.9 702.6,138.4 702.8,138.3 703.0,138.5 703.2,138.5 703.4,138.3 703.7,137.5 703.9,137.5 704.1,137.5 704.3,137.5 704.5,137.3 704.7,137.2 705.0,137.4 705.2,137.0 705.4,137.6 705.6,137.8 705.8,137.1 706.0,137.0 706.3,137.3 706.5,137.9 706.7,138.1 706.9,138.5 707.1,138.8 707.4,138.9 707.6,138.2 707.8,138.7 708.0,138.4 708.2,139.3 708.4,139.2 708.7,138.9 708.9,139.1 709.1,137.3 709.3,137.3 709.5,137.0 709.7,137.3 710.0,137.0 710.2,137.1 710.4,137.5 710.6,137.7 710.8,138.0 711.0,138.5 711.3,138.6 711.5,139.1 711.7,139.2 711.9,139.4 712.1,139.8 712.3,140.0 712.6,140.6 712.8,141.3 713.0,141.9 713.2,141.9 713.4,141.3 713.6,142.0 713.9,142.3 714.1,142.7 714.3,142.4 714.5,142.6 714.7,142.7 714.9,142.8 715.2,142.7 715.4,142.4 715.6,141.4 715.8,141.6 716.0,142.4 716.2,142.6" fill="none" stroke="#3b6ea8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="716.2" cy="142.6" r="4" fill="#3b6ea8" stroke="#fff" stroke-width="1.5"/><text x="631.4" y="364.0" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">Validation</text><polyline points="736.2,77.7 736.5,77.6 736.7,77.8 736.9,77.7 737.1,77.6 737.3,78.6 737.5,79.3 737.8,79.3 738.0,79.4 738.2,79.5 738.4,79.8 738.6,80.4 738.8,81.1 739.1,80.8 739.3,80.9 739.5,81.2 739.7,81.7 739.9,82.6 740.1,82.6 740.4,83.0 740.6,83.3 740.8,83.9 741.0,83.5 741.2,83.5 741.4,83.7 741.7,84.6 741.9,84.2 742.1,84.6 742.3,84.3 742.5,85.1 742.7,84.2 743.0,84.4 743.2,84.2 743.4,83.5 743.6,83.7 743.8,84.2 744.0,85.1 744.3,84.7 744.5,85.1 744.7,85.4 744.9,84.5 745.1,84.4 745.3,84.6 745.6,85.1 745.8,85.3 746.0,84.6 746.2,84.1 746.4,84.1 746.6,84.1 746.9,84.0 747.1,83.7 747.3,83.9 747.5,84.7 747.7,85.5 747.9,85.7 748.2,85.7 748.4,84.6 748.6,84.8 748.8,84.3 749.0,84.9 749.2,85.7 749.5,85.4 749.7,85.7 749.9,85.9 750.1,84.3 750.3,84.4 750.5,83.5 750.8,83.8 751.0,84.2 751.2,83.9 751.4,83.9 751.6,83.9 751.8,84.1 752.1,84.6 752.3,83.9 752.5,84.2 752.7,84.4 752.9,85.5 753.2,83.7 753.4,83.9 753.6,84.1 753.8,83.7 754.0,84.0 754.2,83.3 754.5,83.3 754.7,83.2 754.9,83.3 755.1,83.8 755.3,84.3 755.5,84.3 755.8,84.8 756.0,85.5 756.2,85.6 756.4,86.0 756.6,86.2 756.8,86.0 757.1,85.9 757.3,85.7 757.5,85.5 757.7,85.9 757.9,86.7 758.1,86.5 758.4,86.6 758.6,86.9 758.8,87.1 759.0,87.4 759.2,87.7 759.4,87.2 759.7,87.1 759.9,87.1 760.1,87.1 760.3,86.7 760.5,86.7 760.7,86.9 761.0,86.6 761.2,87.1 761.4,87.1 761.6,87.3 761.8,86.6 762.0,87.1 762.3,87.1 762.5,87.4 762.7,86.9 762.9,87.1 763.1,87.9 763.3,87.9 763.6,87.9 763.8,87.9 764.0,88.2 764.2,87.5 764.4,88.3 764.6,88.9 764.9,89.5 765.1,88.8 765.3,89.0 765.5,89.3 765.7,89.5 765.9,89.7 766.2,89.7 766.4,88.3 766.6,88.9 766.8,88.4 767.0,88.9 767.2,89.3 767.5,88.6 767.7,88.8 767.9,88.8 768.1,89.5 768.3,89.6 768.5,89.5 768.8,88.5 769.0,89.4 769.2,89.5 769.4,89.3 769.6,89.3 769.8,89.6 770.1,89.9 770.3,89.5 770.5,89.4 770.7,89.7 770.9,90.1 771.1,89.7 771.4,90.3 771.6,89.9 771.8,90.1 772.0,89.8 772.2,90.9 772.4,91.0 772.7,89.9 772.9,89.0 773.1,89.5 773.3,90.5 773.5,91.1 773.7,91.3 774.0,91.4 774.2,92.2 774.4,92.5 774.6,92.2 774.8,92.2 775.0,92.5 775.3,92.6 775.5,92.3 775.7,93.4 775.9,93.7 776.1,93.7 776.3,94.0 776.6,94.5 776.8,94.7 777.0,94.5 777.2,94.4 777.4,94.1 777.6,93.5 777.9,93.0 778.1,91.9 778.3,92.4 778.5,92.5 778.7,92.4 779.0,92.5 779.2,92.6 779.4,92.8 779.6,92.7 779.8,93.2 780.0,92.9 780.3,93.2 780.5,94.3 780.7,94.3 780.9,95.2 781.1,95.7 781.3,95.8 781.6,95.6 781.8,95.3 782.0,95.9 782.2,96.2 782.4,96.4 782.6,96.1 782.9,95.3 783.1,95.4 783.3,95.9 783.5,95.8 783.7,95.5 783.9,95.0 784.2,95.1 784.4,95.0 784.6,95.6 784.8,95.8 785.0,95.9 785.2,96.3 785.5,96.8 785.7,97.1 785.9,97.3 786.1,97.5 786.3,97.7 786.5,97.7 786.8,97.4 787.0,97.7 787.2,97.7 787.4,97.6 787.6,97.8 787.8,97.5 788.1,97.6 788.3,97.6 788.5,97.8 788.7,98.0 788.9,98.3 789.1,99.0 789.4,99.6 789.6,99.6 789.8,99.9 790.0,98.7 790.2,98.8 790.4,98.4 790.7,98.4 790.9,98.5 791.1,98.3 791.3,96.4 791.5,96.2 791.7,96.2 792.0,96.0 792.2,96.0 792.4,96.6 792.6,96.8 792.8,96.9 793.0,97.4 793.3,98.3 793.5,98.2 793.7,98.1 793.9,98.8 794.1,98.8 794.3,99.2 794.6,100.1 794.8,100.8 795.0,101.1 795.2,101.1 795.4,101.4 795.6,101.3 795.9,101.7 796.1,102.0 796.3,102.3 796.5,102.5 796.7,102.8 796.9,102.4 797.2,102.9 797.4,103.3 797.6,102.9 797.8,102.7 798.0,103.1 798.2,102.7 798.5,102.8 798.7,102.8 798.9,103.0 799.1,103.0 799.3,103.6 799.5,103.9 799.8,104.4 800.0,104.6 800.2,104.6 800.4,104.7 800.6,104.8 800.8,105.0 801.1,105.2 801.3,105.9 801.5,105.9 801.7,106.0 801.9,106.5 802.1,107.2 802.4,107.4 802.6,107.6 802.8,107.8 803.0,107.1 803.2,106.8 803.4,106.0 803.7,106.5 803.9,106.4 804.1,106.7 804.3,106.6 804.5,106.7 804.8,106.4 805.0,106.6 805.2,106.8 805.4,107.1 805.6,107.2 805.8,107.3 806.1,107.2 806.3,106.9 806.5,106.9 806.7,107.2 806.9,106.7 807.1,106.7 807.4,107.4 807.6,107.5 807.8,107.2 808.0,106.9 808.2,106.0 808.4,106.3 808.7,105.7 808.9,104.8 809.1,104.8 809.3,104.4 809.5,104.8 809.7,104.1 810.0,104.2 810.2,104.3 810.4,103.1 810.6,103.6 810.8,102.0 811.0,102.7 811.3,102.8 811.5,103.3 811.7,103.1 811.9,103.2 812.1,103.4 812.3,104.1 812.6,104.1 812.8,104.1 813.0,104.7 813.2,105.2 813.4,105.2 813.6,105.4 813.9,104.8 814.1,105.2 814.3,105.2 814.5,105.2 814.7,105.3 814.9,104.9 815.2,105.0 815.4,105.3 815.6,105.3 815.8,104.9 816.0,105.1 816.2,105.1 816.5,105.1 816.7,104.4 816.9,104.9 817.1,104.0 817.3,104.1 817.5,104.2 817.8,104.4 818.0,104.9 818.2,104.4 818.4,104.5 818.6,104.7 818.8,105.2 819.1,105.5 819.3,105.6 819.5,105.8 819.7,105.9 819.9,106.2 820.1,106.5 820.4,107.0 820.6,107.1 820.8,107.3 821.0,107.4 821.2,106.6 821.4,106.6 821.7,106.6 821.9,105.8 822.1,105.5 822.3,105.8 822.5,105.5 822.7,106.2 823.0,106.0 823.2,106.1 823.4,105.8 823.6,106.1 823.8,106.8 824.0,107.2 824.3,106.6 824.5,106.5 824.7,106.5 824.9,107.1 825.1,108.0 825.3,108.0 825.6,109.2 825.8,108.8 826.0,108.5 826.2,109.3 826.4,109.1 826.6,108.5 826.9,108.2 827.1,109.2 827.3,109.5 827.5,109.6 827.7,109.8 827.9,109.3 828.2,109.7 828.4,108.9 828.6,109.2 828.8,108.9 829.0,108.8 829.2,109.3 829.5,108.8 829.7,108.7 829.9,108.8 830.1,108.8 830.3,109.1 830.6,109.4 830.8,109.4 831.0,110.3 831.2,110.4 831.4,110.9 831.6,110.9 831.9,111.2 832.1,111.1 832.3,110.8 832.5,110.4 832.7,110.4 832.9,110.5 833.2,111.3 833.4,110.8 833.6,110.6 833.8,110.9 834.0,111.3 834.2,111.3 834.5,111.4 834.7,111.4 834.9,111.6 835.1,112.2 835.3,112.8 835.5,112.0 835.8,111.7 836.0,111.8 836.2,111.1 836.4,111.5 836.6,111.8 836.8,112.4 837.1,112.9 837.3,113.3 837.5,114.0 837.7,114.0 837.9,113.5 838.1,114.0 838.4,113.5 838.6,113.1 838.8,112.0 839.0,112.0 839.2,112.5 839.4,112.8 839.7,112.1 839.9,112.6 840.1,112.4 840.3,112.6 840.5,112.9 840.7,112.6 841.0,113.5 841.2,113.1 841.4,112.8 841.6,112.9 841.8,112.9 842.0,113.4 842.3,113.0 842.5,113.3 842.7,113.6 842.9,113.8 843.1,113.9 843.3,113.8 843.6,114.0 843.8,114.1 844.0,113.4 844.2,111.6 844.4,110.9 844.6,111.4 844.9,111.8 845.1,111.6 845.3,112.2 845.5,112.8 845.7,112.8 845.9,113.3 846.2,113.4 846.4,113.6 846.6,113.3 846.8,113.5 847.0,113.4 847.2,113.4 847.5,113.4 847.7,112.2 847.9,112.7 848.1,112.6 848.3,112.6 848.5,112.6 848.8,112.8 849.0,113.5 849.2,113.6 849.4,114.0 849.6,114.0 849.8,114.3 850.1,114.5 850.3,113.5 850.5,113.5 850.7,113.8 850.9,113.6 851.1,113.7 851.4,114.2 851.6,113.7 851.8,114.1 852.0,114.2 852.2,113.9 852.4,113.9 852.7,112.6 852.9,112.9 853.1,112.8 853.3,111.8 853.5,112.3 853.7,112.6 854.0,112.9 854.2,113.1 854.4,113.2 854.6,112.8 854.8,113.4 855.1,113.2 855.3,113.0 855.5,113.7 855.7,113.3 855.9,113.5 856.1,113.3 856.4,113.0 856.6,113.2 856.8,113.9 857.0,114.1 857.2,114.5 857.4,114.5 857.7,113.7 857.9,114.0 858.1,114.1 858.3,114.2 858.5,114.9 858.7,114.9 859.0,114.7 859.2,114.6 859.4,115.1 859.6,114.6 859.8,115.9 860.0,115.8 860.3,116.7 860.5,117.4 860.7,117.8 860.9,117.9 861.1,117.4 861.3,117.9 861.6,118.9 861.8,119.5 862.0,119.9 862.2,120.2 862.4,119.9 862.6,120.0 862.9,120.4 863.1,120.5 863.3,120.3 863.5,121.0 863.7,122.0 863.9,122.3 864.2,122.4 864.4,122.7 864.6,122.3 864.8,122.4 865.0,122.6 865.2,122.8 865.5,123.9 865.7,124.1 865.9,124.0 866.1,124.5 866.3,124.4 866.5,124.4 866.8,126.1 867.0,126.2 867.2,126.5 867.4,126.8 867.6,126.0 867.8,125.9 868.1,125.2 868.3,124.8 868.5,125.0 868.7,124.8 868.9,124.9 869.1,126.4 869.4,126.0 869.6,125.9 869.8,124.6 870.0,125.3 870.2,125.3 870.4,124.8 870.7,124.7 870.9,124.8 871.1,125.5 871.3,124.5 871.5,124.5 871.7,124.4 872.0,124.7 872.2,125.7 872.4,126.8 872.6,127.5 872.8,127.3 873.0,127.4 873.3,128.0 873.5,127.4 873.7,128.4 873.9,128.1 874.1,128.5 874.3,128.6 874.6,129.6 874.8,129.2 875.0,129.8 875.2,131.2 875.4,132.4 875.6,132.1 875.9,132.3 876.1,132.8 876.3,132.8 876.5,132.9 876.7,132.9 876.9,132.9 877.2,133.6 877.4,133.3 877.6,133.3 877.8,133.9 878.0,134.0 878.2,134.0 878.5,133.8 878.7,133.1 878.9,134.1 879.1,134.1 879.3,134.2 879.5,134.6 879.8,134.2 880.0,134.3 880.2,133.9 880.4,134.5 880.6,134.6 880.9,135.0 881.1,134.4 881.3,135.1 881.5,135.9 881.7,135.9 881.9,135.6 882.2,134.6 882.4,135.1 882.6,134.5 882.8,135.0 883.0,134.8 883.2,134.7 883.5,134.4 883.7,134.6 883.9,134.7 884.1,134.7 884.3,135.5 884.5,134.9 884.8,135.6 885.0,135.6 885.2,135.8 885.4,135.3 885.6,133.9 885.8,134.6 886.1,134.6 886.3,134.4 886.5,134.9 886.7,135.5 886.9,135.1 887.1,134.5 887.4,136.0 887.6,136.3 887.8,136.7 888.0,137.2 888.2,136.2 888.4,135.9 888.7,136.4 888.9,137.1 889.1,137.3 889.3,138.1 889.5,138.1 889.7,138.2 890.0,138.5 890.2,138.4 890.4,139.2 890.6,139.5 890.8,139.1 891.0,139.4 891.3,140.0 891.5,140.2 891.7,140.2 891.9,140.6 892.1,141.1 892.3,141.4 892.6,141.8 892.8,142.1 893.0,142.1 893.2,142.7 893.4,142.6 893.6,142.4 893.9,142.3 894.1,142.5 894.3,143.1 894.5,143.3 894.7,143.7 894.9,143.7 895.2,143.6 895.4,144.3 895.6,144.3 895.8,144.2 896.0,144.4 896.2,144.8 896.5,145.1 896.7,145.1 896.9,145.3 897.1,145.4 897.3,145.1 897.5,145.7 897.8,145.8 898.0,145.9 898.2,145.9 898.4,145.9 898.6,146.1 898.8,146.4 899.1,145.4 899.3,145.2 899.5,145.4 899.7,145.8 899.9,145.8 900.1,146.2 900.4,146.0 900.6,146.3 900.8,146.2 901.0,146.3 901.2,146.0 901.4,145.7 901.7,145.2 901.9,145.2 902.1,144.4 902.3,145.3 902.5,145.4 902.7,145.8 903.0,145.5 903.2,145.5 903.4,145.5 903.6,145.4 903.8,146.0 904.0,146.0 904.3,146.7 904.5,147.4 904.7,147.4 904.9,147.4 905.1,147.4 905.3,147.7 905.6,147.5 905.8,146.8 906.0,146.7" fill="none" stroke="#d94f45" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="906.0" cy="146.7" r="4" fill="#d94f45" stroke="#fff" stroke-width="1.5"/><text x="821.1" y="364.0" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">Holdout</text><text x="725.2" y="146.6" font-size="11" font-weight="700" fill="#3b6ea8">0.0913x</text><text x="915.0" y="161.6" font-size="11" font-weight="700" fill="#d94f45">0.0786x</text><text x="535.5" y="301.3" font-size="11" font-weight="700" fill="#d79b2b">0.000304x</text><text x="74.0" y="18.0" font-size="11" font-weight="700" fill="#0b1220">Growth of $1, log scale</text></svg><figcaption><strong>Equity, 2012–2025</strong> A $1 stake declines in every sample. The line is plotted on a log scale so the scale of the loss is visible.</figcaption></figure></div>
+      <div class="reveal"><figure class="chart-figure"><svg class="chart" viewBox="0 0 980 554" role="img" aria-labelledby="grid-title grid-desc" preserveAspectRatio="xMidYMid meet"><title id="grid-title">Every grid variant has a negative net Sharpe ratio</title><desc id="grid-desc">Horizontal bars show the development-sample net Sharpe ratio for all eighteen pre-registered parameter combinations. The least-bad variant is still negative.</desc><line x1="720" y1="42" x2="720" y2="530" stroke="#0b1220" stroke-width="1"/><text x="250.0" y="24.0" font-size="10" fill="#64748b">Cluster ATR / touches / confirms</text><text x="728.0" y="24.0" font-size="10" fill="#64748b">Net Sharpe</text><rect x="466.1" y="50.0" width="253.9" height="16" rx="2" fill="#d79b2b" opacity="0.95"/><text x="242.0" y="62.0" text-anchor="end" font-size="11" fill="#0b1220">1.00 / 3 / 3</text><text x="728.0" y="62.0" font-size="11" font-weight="700" fill="#d79b2b">-2.26</text><rect x="443.5" y="75.0" width="276.5" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="87.0" text-anchor="end" font-size="11" fill="#0b1220">1.00 / 3 / 2</text><text x="728.0" y="87.0" font-size="11" font-weight="400" fill="#64748b">-2.46</text><rect x="426.1" y="100.0" width="293.9" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="112.0" text-anchor="end" font-size="11" fill="#0b1220">1.00 / 2 / 3</text><text x="728.0" y="112.0" font-size="11" font-weight="400" fill="#64748b">-2.61</text><rect x="417.8" y="125.0" width="302.2" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="137.0" text-anchor="end" font-size="11" fill="#0b1220">0.25 / 3 / 3</text><text x="728.0" y="137.0" font-size="11" font-weight="400" fill="#64748b">-2.69</text><rect x="410.2" y="150.0" width="309.8" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="162.0" text-anchor="end" font-size="11" fill="#0b1220">1.00 / 2 / 2</text><text x="728.0" y="162.0" font-size="11" font-weight="400" fill="#64748b">-2.75</text><rect x="407.2" y="175.0" width="312.8" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="187.0" text-anchor="end" font-size="11" fill="#0b1220">0.25 / 3 / 2</text><text x="728.0" y="187.0" font-size="11" font-weight="400" fill="#64748b">-2.78</text><rect x="400.5" y="200.0" width="319.5" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="212.0" text-anchor="end" font-size="11" fill="#0b1220">1.00 / 3 / 1</text><text x="728.0" y="212.0" font-size="11" font-weight="400" fill="#64748b">-2.84</text><rect x="389.5" y="225.0" width="330.5" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="237.0" text-anchor="end" font-size="11" fill="#0b1220">0.50 / 3 / 2</text><text x="728.0" y="237.0" font-size="11" font-weight="400" fill="#64748b">-2.94</text><rect x="385.0" y="250.0" width="335.0" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="262.0" text-anchor="end" font-size="11" fill="#0b1220">0.25 / 3 / 1</text><text x="728.0" y="262.0" font-size="11" font-weight="400" fill="#64748b">-2.98</text><rect x="372.7" y="275.0" width="347.3" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="287.0" text-anchor="end" font-size="11" fill="#0b1220">0.50 / 3 / 3</text><text x="728.0" y="287.0" font-size="11" font-weight="400" fill="#64748b">-3.09</text><rect x="356.1" y="300.0" width="363.9" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="312.0" text-anchor="end" font-size="11" fill="#0b1220">1.00 / 2 / 1</text><text x="728.0" y="312.0" font-size="11" font-weight="400" fill="#64748b">-3.23</text><rect x="344.9" y="325.0" width="375.1" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="337.0" text-anchor="end" font-size="11" fill="#0b1220">0.50 / 3 / 1</text><text x="728.0" y="337.0" font-size="11" font-weight="400" fill="#64748b">-3.33</text><rect x="324.1" y="350.0" width="395.9" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="362.0" text-anchor="end" font-size="11" fill="#0b1220">0.50 / 2 / 2</text><text x="728.0" y="362.0" font-size="11" font-weight="400" fill="#64748b">-3.52</text><rect x="315.0" y="375.0" width="405.0" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="387.0" text-anchor="end" font-size="11" fill="#0b1220">0.25 / 2 / 3</text><text x="728.0" y="387.0" font-size="11" font-weight="400" fill="#64748b">-3.60</text><rect x="312.4" y="400.0" width="407.6" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="412.0" text-anchor="end" font-size="11" fill="#0b1220">0.50 / 2 / 3</text><text x="728.0" y="412.0" font-size="11" font-weight="400" fill="#64748b">-3.62</text><rect x="297.9" y="425.0" width="422.1" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="437.0" text-anchor="end" font-size="11" fill="#0b1220">0.25 / 2 / 2</text><text x="728.0" y="437.0" font-size="11" font-weight="400" fill="#64748b">-3.75</text><rect x="277.6" y="450.0" width="442.4" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="462.0" text-anchor="end" font-size="11" fill="#0b1220">0.25 / 2 / 1</text><text x="728.0" y="462.0" font-size="11" font-weight="400" fill="#64748b">-3.93</text><rect x="272.0" y="475.0" width="448.0" height="16" rx="2" fill="#d94f45" opacity="0.7"/><text x="242.0" y="487.0" text-anchor="end" font-size="11" fill="#0b1220">0.50 / 2 / 1</text><text x="728.0" y="487.0" font-size="11" font-weight="400" fill="#64748b">-3.98</text></svg><figcaption><strong>The whole parameter grid fails</strong> Each row is one pre-registered combination. Gold is the least-bad variant; it still loses after costs.</figcaption></figure></div>
+      <div class="reveal"><figure class="chart-figure"><svg class="chart" viewBox="0 0 900 260" role="img" aria-labelledby="costs-title costs-desc" preserveAspectRatio="xMidYMid meet"><title id="costs-title">Cost sensitivity of the holdout result</title><desc id="costs-desc">Mean net R becomes more negative as the cost assumption rises. Even at zero cost the result is negative.</desc><line x1="610" y1="42" x2="610" y2="232" stroke="#0b1220" stroke-width="1"/><text x="230.0" y="24.0" font-size="10" fill="#64748b">Cost multiplier</text><text x="618.0" y="24.0" font-size="10" fill="#64748b">Mean net R</text><rect x="587.8" y="52.0" width="22.2" height="24" rx="3" fill="#d94f45" opacity="0.86"/><text x="222.0" y="68.0" text-anchor="end" font-size="11" fill="#0b1220">0× modelled cost</text><text x="618.0" y="68.0" font-size="11" font-weight="700" fill="#d94f45">-0.028R</text><text x="696.0" y="68.0" font-size="10" fill="#64748b">Sharpe -0.42</text><rect x="476.6" y="98.0" width="133.4" height="24" rx="3" fill="#d79b2b" opacity="0.86"/><text x="222.0" y="114.0" text-anchor="end" font-size="11" fill="#0b1220">1× modelled cost</text><text x="618.0" y="114.0" font-size="11" font-weight="700" fill="#d79b2b">-0.166R</text><text x="696.0" y="114.0" font-size="10" fill="#64748b">Sharpe -2.79</text><rect x="365.3" y="144.0" width="244.7" height="24" rx="3" fill="#d94f45" opacity="0.86"/><text x="222.0" y="160.0" text-anchor="end" font-size="11" fill="#0b1220">2× modelled cost</text><text x="618.0" y="160.0" font-size="11" font-weight="700" fill="#d94f45">-0.304R</text><text x="696.0" y="160.0" font-size="10" fill="#64748b">Sharpe -5.02</text><rect x="254.0" y="190.0" width="356.0" height="24" rx="3" fill="#d94f45" opacity="0.86"/><text x="222.0" y="206.0" text-anchor="end" font-size="11" fill="#0b1220">3× modelled cost</text><text x="618.0" y="206.0" font-size="11" font-weight="700" fill="#d94f45">-0.442R</text><text x="696.0" y="206.0" font-size="10" fill="#64748b">Sharpe -7.05</text></svg><figcaption><strong>Costs make a weak result worse</strong> The gold bar is the pre-registered cost assumption. Zero-cost trading is shown only as a stress test, not as a realistic scenario.</figcaption></figure></div>
+      <div class="reveal"><figure class="chart-figure"><svg class="chart" viewBox="0 0 920 284" role="img" aria-labelledby="bench-title bench-desc" preserveAspectRatio="xMidYMid meet"><title id="bench-title">Holdout Sharpe ratios for benchmarks and the key-level rule</title><desc id="bench-desc">Buy and hold and one simple trend benchmark are positive in this sample. The key-level rule is the worst of the five.</desc><line x1="600" y1="40" x2="600" y2="256" stroke="#0b1220" stroke-width="1"/><text x="240.0" y="22.0" font-size="10" fill="#64748b">Strategy</text><text x="608.0" y="22.0" font-size="10" fill="#64748b">Holdout Sharpe</text><rect x="600.0" y="50.0" width="199.6" height="22" rx="3" fill="#0f766e" opacity="0.84"/><text x="232.0" y="65.0" text-anchor="end" font-size="11" font-weight="400" fill="#0b1220">Buy &amp; hold</text><text x="807.6" y="65.0" text-anchor="start" font-size="11" font-weight="700" fill="#0f766e">+1.92</text><rect x="600.0" y="90.0" width="53.3" height="22" rx="3" fill="#0f766e" opacity="0.84"/><text x="232.0" y="105.0" text-anchor="end" font-size="11" font-weight="400" fill="#0b1220">SMA 50/200</text><text x="661.3" y="105.0" text-anchor="start" font-size="11" font-weight="700" fill="#0f766e">+0.51</text><rect x="533.6" y="130.0" width="66.4" height="22" rx="3" fill="#3b6ea8" opacity="0.84"/><text x="232.0" y="145.0" text-anchor="end" font-size="11" font-weight="400" fill="#0b1220">Trend filter</text><text x="525.6" y="145.0" text-anchor="end" font-size="11" font-weight="700" fill="#3b6ea8">-0.64</text><rect x="527.2" y="170.0" width="72.8" height="22" rx="3" fill="#3b6ea8" opacity="0.84"/><text x="232.0" y="185.0" text-anchor="end" font-size="11" font-weight="400" fill="#0b1220">Donchian 20</text><text x="519.2" y="185.0" text-anchor="end" font-size="11" font-weight="700" fill="#3b6ea8">-0.70</text><rect x="310.0" y="210.0" width="290.0" height="22" rx="3" fill="#d94f45" opacity="0.84"/><text x="232.0" y="225.0" text-anchor="end" font-size="11" font-weight="700" fill="#0b1220">Key levels (holdout)</text><text x="302.0" y="225.0" text-anchor="end" font-size="11" font-weight="700" fill="#d94f45">-2.79</text></svg><figcaption><strong>Simple benchmarks did better</strong> The key-level rule is compared with buy-and-hold and three simple technical rules on the same holdout window and cost model.</figcaption></figure></div>
+      <div class="reveal"><figure class="chart-figure"><svg class="chart" viewBox="0 0 900 270" role="img" aria-labelledby="hold-title hold-desc" preserveAspectRatio="xMidYMid meet"><title id="hold-title">Level reaction audit</title><desc id="hold-desc">Only 15.5 percent of executed signals held without a close through the level. Even the weaker one-R measure reached only 49.2 percent.</desc><line x1="610" y1="38" x2="610" y2="246" stroke="#0b1220" stroke-width="1"/><text x="430.0" y="22.0" font-size="10" fill="#64748b">Share of executed signals</text><rect x="610" y="48" width="38.7" height="26" rx="3" fill="#d94f45" opacity="0.84"/><text x="422.0" y="65.0" text-anchor="end" font-size="11" fill="#0b1220">Strict hold (no close through level)</text><text x="656.7" y="65.0" font-size="11" font-weight="700" fill="#d94f45">15.5%</text><rect x="610" y="94" width="123.1" height="26" rx="3" fill="#d79b2b" opacity="0.84"/><text x="422.0" y="111.0" text-anchor="end" font-size="11" fill="#0b1220">Reached +1R before −1R</text><text x="741.1" y="111.0" font-size="11" font-weight="700" fill="#d79b2b">49.2%</text><rect x="610" y="140" width="78.3" height="26" rx="3" fill="#0f766e" opacity="0.84"/><text x="422.0" y="157.0" text-anchor="end" font-size="11" fill="#0b1220">Reached +2R before −1R</text><text x="696.3" y="157.0" font-size="11" font-weight="700" fill="#0f766e">31.3%</text><rect x="610" y="186" width="54.6" height="26" rx="3" fill="#3b6ea8" opacity="0.84"/><text x="422.0" y="203.0" text-anchor="end" font-size="11" fill="#0b1220">Reached +3R before −1R</text><text x="672.6" y="203.0" font-size="11" font-weight="700" fill="#3b6ea8">21.8%</text></svg><figcaption><strong>The level does not hold</strong> A strict hold means price never closes through the level during the next 96 bars. The +1R measure is weaker and still close to a coin flip.</figcaption></figure></div>
+      <div class="wide reveal"><figure class="chart-figure"><svg class="chart" viewBox="0 0 760 320" role="img" aria-labelledby="hist-title hist-desc" preserveAspectRatio="xMidYMid meet"><title id="hist-title">Distribution of holdout trade outcomes</title><desc id="hist-desc">Most holdout trades stop out near minus one R. The mean is negative 0.166 R.</desc><line x1="58" y1="258" x2="728" y2="258" stroke="#0b1220" stroke-width="1"/><text x="58.0" y="20.0" font-size="11" font-weight="700" fill="#0b1220">Holdout trades by net R</text><rect x="59.0" y="257.0" width="20.3" height="1.0" fill="#0f766e" opacity="0.72"/><rect x="81.3" y="257.7" width="20.3" height="0.3" fill="#0f766e" opacity="0.72"/><rect x="103.7" y="257.7" width="20.3" height="0.3" fill="#0f766e" opacity="0.72"/><rect x="126.0" y="257.7" width="20.3" height="0.3" fill="#0f766e" opacity="0.72"/><rect x="148.3" y="256.7" width="20.3" height="1.3" fill="#0f766e" opacity="0.72"/><rect x="170.7" y="257.4" width="20.3" height="0.6" fill="#0f766e" opacity="0.72"/><rect x="193.0" y="255.9" width="20.3" height="2.1" fill="#0f766e" opacity="0.72"/><rect x="215.3" y="248.3" width="20.3" height="9.7" fill="#0f766e" opacity="0.72"/><rect x="237.7" y="200.6" width="20.3" height="57.4" fill="#0f766e" opacity="0.72"/><rect x="260.0" y="34.0" width="20.3" height="224.0" fill="#0f766e" opacity="0.72"/><rect x="282.3" y="256.4" width="20.3" height="1.6" fill="#0f766e" opacity="0.72"/><rect x="304.7" y="255.3" width="20.3" height="2.7" fill="#0f766e" opacity="0.72"/><rect x="327.0" y="253.4" width="20.3" height="4.6" fill="#0f766e" opacity="0.72"/><rect x="349.3" y="252.9" width="20.3" height="5.1" fill="#0f766e" opacity="0.72"/><rect x="371.7" y="250.9" width="20.3" height="7.1" fill="#0f766e" opacity="0.72"/><rect x="394.0" y="250.9" width="20.3" height="7.1" fill="#0f766e" opacity="0.72"/><rect x="416.3" y="249.3" width="20.3" height="8.7" fill="#0f766e" opacity="0.72"/><rect x="438.7" y="252.1" width="20.3" height="5.9" fill="#0f766e" opacity="0.72"/><rect x="461.0" y="253.1" width="20.3" height="4.9" fill="#0f766e" opacity="0.72"/><rect x="483.3" y="252.0" width="20.3" height="6.0" fill="#0f766e" opacity="0.72"/><rect x="505.7" y="248.3" width="20.3" height="9.7" fill="#0f766e" opacity="0.72"/><rect x="528.0" y="250.9" width="20.3" height="7.1" fill="#0f766e" opacity="0.72"/><rect x="550.3" y="251.4" width="20.3" height="6.6" fill="#0f766e" opacity="0.72"/><rect x="572.7" y="249.7" width="20.3" height="8.3" fill="#0f766e" opacity="0.72"/><rect x="595.0" y="240.0" width="20.3" height="18.0" fill="#0f766e" opacity="0.72"/><rect x="617.3" y="254.3" width="20.3" height="3.7" fill="#0f766e" opacity="0.72"/><rect x="639.7" y="253.7" width="20.3" height="4.3" fill="#0f766e" opacity="0.72"/><rect x="662.0" y="254.6" width="20.3" height="3.4" fill="#0f766e" opacity="0.72"/><rect x="684.3" y="254.9" width="20.3" height="3.1" fill="#0f766e" opacity="0.72"/><rect x="706.7" y="222.3" width="20.3" height="35.7" fill="#0f766e" opacity="0.72"/><line x1="374.5" y1="34" x2="374.5" y2="258" stroke="#d94f45" stroke-width="2" stroke-dasharray="4 4"/><text x="380.5" y="46.0" font-size="11" font-weight="700" fill="#d94f45">mean -0.166R</text><text x="58.0" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">-3</text><text x="169.7" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">-2</text><text x="281.3" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">-1</text><text x="393.0" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">0</text><text x="504.7" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">+1</text><text x="616.3" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">+2</text><text x="728.0" y="276.0" text-anchor="middle" font-size="10" fill="#64748b">+3</text><text x="393.0" y="316.0" text-anchor="middle" font-size="10" fill="#64748b">Net R (values clipped at ±3R)</text></svg><figcaption><strong>Most trades lose about 1R</strong> The distribution is centred left of zero. A few large winners do not rescue the average.</figcaption></figure></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="reveal">
+        <h3>Headline results</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>Development, validation, and sealed holdout, net of modelled costs.</caption>
+            <thead><tr><th>Metric</th><th>Development</th><th>Validation</th><th>Sealed holdout</th></tr></thead>
+            <tbody id="headlineBody"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The pre-registered success criterion required a positive net mean R and a positive net Sharpe on the sealed holdout. It failed both.</p>
+      </div>
+      <div class="reveal">
+        <h3>Selection and significance</h3>
+        <div class="grid-2" style="gap:10px">
+          <div class="card coral"><span class="label">Deflated Sharpe, base</span><div class="big">1.14e-23</div><p class="tiny quiet">No evidence after 28 trials.</p></div>
+          <div class="card coral"><span class="label">Deflated Sharpe, winner</span><div class="big">4.17e-15</div><p class="tiny quiet">The best variant is not special.</p></div>
+          <div class="card"><span class="label">PBO</span><div class="big">0.1071</div><p class="tiny quiet">924 splits. Modest only because the whole set loses.</p></div>
+          <div class="card"><span class="label">Reality Check / SPA</span><div class="big">1.0000</div><p class="tiny quiet">Cannot reject the benchmark set.</p></div>
+          <div class="card"><span class="label">Bootstrap mean R</span><div class="big">[-0.228, -0.101]</div><p class="tiny quiet">5,000 resamples, block 20.</p></div>
+          <div class="card"><span class="label">Bootstrap Sharpe</span><div class="big">[-3.96, -1.66]</div><p class="tiny quiet">Entirely below zero.</p></div>
+        </div>
+        <p class="table-note" style="margin-top:12px">Alpha versus an equal-weight basket: <strong>-54.5%</strong> a year (p = 3.65e-07). Random-entry placebo: p = 0.7180. Random-level placebo: &lt; 0.0050 (0/200).</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="reveal">
+        <h3>Benchmarks, same window, same costs</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>Holdout Sharpe ratios. A higher number is better.</caption>
+            <thead><tr><th>Strategy</th><th>Annualised return</th><th>Net Sharpe</th><th>Max drawdown</th></tr></thead>
+            <tbody id="benchBody"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The key-level rule is the worst of the five. A strategy does not have to beat every benchmark, but it should not be last after a decade of development.</p>
+      </div>
+      <div class="reveal">
+        <h3>Level reaction audit</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>Executed development signals, forward 96 bars.</caption>
+            <thead><tr><th>Measure</th><th>Share</th><th>Plain reading</th></tr></thead>
+            <tbody>
+              <tr><td>Strict hold</td><td class="neg">15.5%</td><td>No close through the level</td></tr>
+              <tr><td>+1R before −1R</td><td>49.2%</td><td>Slightly worse than a coin flip</td></tr>
+              <tr><td>+2R before −1R</td><td>31.3%</td><td>About one in three</td></tr>
+              <tr><td>+3R before −1R</td><td>21.8%</td><td>About one in five</td></tr>
+              <tr><td>Mean MFE</td><td>+4.306R</td><td>Average best excursion</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">The level is not a wall. The mechanism the strategy depends on is not present in the executed signals.</p>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:22px">
+      <h3>Holdout by instrument</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Eight liquid instruments. The average is negative and the dispersion is not evidence of a hidden profitable subset.</caption>
+          <thead><tr><th>Symbol</th><th>Holdout trades</th><th>Mean net R</th><th>Win rate</th></tr></thead>
+          <tbody id="symbolBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:22px">
+      <div class="card teal reveal"><span class="label">Data checked</span><div class="big">2,930,707</div><p class="tiny quiet">bars across 40 series.</p></div>
+      <div class="card teal reveal"><span class="label">Duplicate timestamps</span><div class="big">0</div><p class="tiny quiet">OHLC violations: 0. Non-positive prices: 0.</p></div>
+      <div class="card teal reveal"><span class="label">Cross-vendor correlation</span><div class="big">0.76–1.00</div><p class="tiny quiet">Weekly returns versus an independent daily source.</p></div>
+    </div>
+
+    <div class="reveal" style="margin-top:22px">
+      <h3>Data integrity by timeframe</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Every processed series is checked for duplicates, impossible OHLC bars, and non-positive prices.</caption>
+          <thead><tr><th>Timeframe</th><th>Series</th><th>Bars</th><th>Duplicate timestamps</th><th>OHLC violations</th><th>Non-positive prices</th></tr></thead>
+          <tbody id="integrityBody"></tbody>
+        </table>
+      </div>
+      <p class="table-note">The largest absolute 15-minute log return was 7.6%, consistent with a real intraday move rather than a corrupted bar. The intrabar ambiguity audit found 8 ambiguous trades out of 7,891 development trades (0.1%).</p>
+    </div>
+
+    <div class="reveal" style="margin-top:22px">
+      <h3>2026 live shadow</h3>
+      <div class="grid-4">
+        <div class="card"><span class="label">Trades</span><div class="big">207</div><p class="tiny quiet">Descriptive only.</p></div>
+        <div class="card coral"><span class="label">Mean net R</span><div class="big">-0.139</div><p class="tiny quiet">Not a significance test.</p></div>
+        <div class="card"><span class="label">Win rate</span><div class="big">30.9%</div><p class="tiny quiet">Same direction as history.</p></div>
+        <div class="card"><span class="label">Profit factor</span><div class="big">0.82</div><p class="tiny quiet">Below 1.0.</p></div>
+      </div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table>
+          <caption>Live shadow on the most recent 15-minute window. No live capital was used.</caption>
+          <thead><tr><th>Symbol</th><th>Live trades</th><th>Mean net R</th><th>Win rate</th></tr></thead>
+          <tbody id="liveBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="explore">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Explore</span>
+      <h2>Change the assumptions yourself</h2>
+      <p class="lead-sm">The result is not a single number that you have to trust. Move the cost slider and filter the grid. Every value comes from the stored results.</p>
+    </div>
+
+    <div class="explorer">
+      <div class="card reveal">
+        <h3>Cost explorer</h3>
+        <p class="small quiet">The pre-registered model charges half-spread plus slippage on both sides. Drag the cost multiplier to see how the holdout result responds.</p>
+        <div class="control">
+          <label for="costRange">Cost multiplier</label>
+          <input id="costRange" type="range" min="0" max="3" step="1" value="1" aria-describedby="costHelp">
+          <div class="range-labels" aria-hidden="true"><span>0×</span><span>1×</span><span>2×</span><span>3×</span></div>
+          <p id="costHelp" class="tiny quiet">1× is the pre-registered assumption. 0× is a stress test, not a realistic scenario.</p>
+        </div>
+        <div class="cost-readout" aria-live="polite">
+          <div><b id="costTrades">—</b><span>Trades</span></div>
+          <div><b id="costR">—</b><span>Mean net R</span></div>
+          <div><b id="costSharpe">—</b><span>Net Sharpe</span></div>
+        </div>
+        <div class="bars" id="costBars" aria-hidden="true"></div>
+        <p class="tiny quiet" style="margin-top:12px">At 0× the strategy still loses. Costs make the loss larger; they are not the only cause.</p>
+      </div>
+
+      <div class="card reveal">
+        <h3>Grid explorer</h3>
+        <p class="small quiet">All 18 combinations were pre-registered. Filter by the level-cluster width. Every row is negative.</p>
+        <div class="control">
+          <label for="clusterFilter">Cluster width (× ATR)</label>
+          <select id="clusterFilter">
+            <option value="all">All widths</option>
+            <option value="0.25">0.25</option>
+            <option value="0.5">0.50</option>
+            <option value="1">1.00</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="max-height:420px">
+          <table>
+            <caption id="gridCaption">All pre-registered variants, sorted by net Sharpe.</caption>
+            <thead><tr><th>ATR / touches / confirms</th><th>Trades</th><th>Mean net R</th><th>Net Sharpe</th></tr></thead>
+            <tbody id="gridBody"></tbody>
+          </table>
+        </div>
+        <p class="table-note">The least-bad variant is still -2.26. There is no profitable corner of the grid.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="anatomy">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">What was tested</span>
+      <h2>The rules, in plain English</h2>
+      <p class="lead-sm">This is one explicit, mechanical interpretation of a discretionary idea. The full specification is in the pre-registration document.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <div class="steps">
+          <div class="step"><div class="num">1</div><div><h3>Find the levels</h3><p>Monthly, weekly, and daily pivots are clustered into levels. Pivots within 0.50 × ATR(D1) become one level. A level needs at least two touches.</p></div></div>
+          <div class="step"><div class="num">2</div><div><h3>Filter the direction</h3><p>The 4-hour trend is read from the last two confirmed swing highs and lows. Only trades in the trend direction are allowed.</p></div></div>
+          <div class="step"><div class="num">3</div><div><h3>Wait for the trigger</h3><p>On the 15-minute chart, price must touch the level and close back through it. Two confirmation closes and a directional candle are required. The entry is the next bar open.</p></div></div>
+          <div class="step"><div class="num">4</div><div><h3>Manage the risk</h3><p>The stop sits just beyond the level or the 5-bar extreme, capped at 4 × ATR. The target is the next opposite level, default 2R, capped at 5R. The time stop is 96 bars.</p></div></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="card">
+          <h3>The experiment in numbers</h3>
+          <div class="table-wrap" style="margin-top:10px">
+            <table>
+              <caption>Pre-registered design.</caption>
+              <tbody>
+                <tr><td>Instruments</td><td>8 liquid markets</td></tr>
+                <tr><td>Development</td><td>2012–2019</td></tr>
+                <tr><td>Validation</td><td>2020–2022</td></tr>
+                <tr><td>Sealed holdout</td><td>2023–2025</td></tr>
+                <tr><td>Risk per trade</td><td>0.5% of equity</td></tr>
+                <tr><td>Costs</td><td>Half-spread + slippage, both sides</td></tr>
+                <tr><td>Grid</td><td>18 combinations</td></tr>
+                <tr><td>Ambiguity rule</td><td>Stop assumed first if stop and target share a bar</td></tr>
+                <tr><td>Freeze</td><td><code>bb94af28645d</code> (27 files)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="tiny quiet" style="margin-top:12px">The holdout was opened once. The guard now refuses to re-open it. Post-holdout edits are documented in the deviation log.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="learn">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Learn</span>
+      <h2>🌱 Beginner guide — read this and you are a professional</h2>
+      <p class="lead-sm">Twelve questions, instant explanations, and a score at the end. Start anywhere. The quiz teaches the controls that separate a real test from a sales pitch. <strong>You will know more than most interview candidates.</strong></p>
+    </div>
+
+    <div class="quiz-shell">
+      <aside class="quiz-meta reveal">
+        <h3>How the course works</h3>
+        <ul>
+          <li><strong>Beginner:</strong> R, levels, costs, and holdouts.</li>
+          <li><strong>Analyst:</strong> placebos, benchmarks, and selection.</li>
+          <li><strong>Professional:</strong> deflated Sharpe, PBO, and a due-diligence sequence.</li>
+        </ul>
+        <p class="small quiet">Each answer explains the reasoning, not just the correct letter. You can restart at any time. The quiz is keyboard accessible and remembers nothing between visits.</p>
+        <div class="callout" style="margin-top:14px"><strong>No jargon left behind.</strong> If a term is unfamiliar, the glossary in the README has a plain-language definition.</div>
+        <div class="pill-row">
+          <span class="pill">12 questions</span>
+          <span class="pill">3 levels</span>
+          <span class="pill">Instant feedback</span>
+        </div>
+      </aside>
+
+      <div class="quiz-card reveal">
+        <div class="quiz-top">
+          <span class="level-tag" id="quizLevel">Beginner</span>
+          <span class="tiny quiet" id="quizProgressText">Question 1 of 12</span>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" id="quizProgress"><span id="quizProgressBar"></span></div>
+
+        <form id="quizForm" novalidate>
+          <fieldset id="quizFieldset">
+            <legend id="quizLegend">Loading question…</legend>
+            <div class="options" id="quizOptions"></div>
+          </fieldset>
+          <div class="quiz-actions">
+            <button class="btn btn-primary" type="submit" id="checkBtn">Check answer</button>
+            <button class="btn btn-ghost" type="button" id="nextBtn" hidden>Next question →</button>
+            <button class="btn btn-ghost" type="button" id="restartBtn" hidden>Restart</button>
+          </div>
+          <div class="feedback neutral" id="quizFeedback" role="status" aria-live="polite">Choose an answer, then check it.</div>
+        </form>
+
+        <div class="result" id="quizResult" role="status" aria-live="polite">
+          <span class="tier" id="resultTier">Result</span>
+          <div class="score" id="resultScore">0 / 12</div>
+          <p id="resultText" class="small quiet"></p>
+          <p class="small" id="resultPhrase"><strong>You will know more than most interview candidates.</strong></p>
+          <button class="btn btn-primary" type="button" id="restartBtn2">Take it again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="business">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Business</span>
+      <h2>Who uses this, and what they get</h2>
+      <p class="lead-sm">The research is a <strong>negative result with positive utility</strong>. It helps a business avoid a bad allocation and gives a team a repeatable way to evaluate the next idea.</p>
+    </div>
+
+    <div class="usecase">
+      <div class="card reveal"><h3>Investment committee / allocator</h3><p>An evidence pack for a strategy pitch: sealed holdout, realistic costs, benchmarks, placebos, and multiple-testing controls. Approve or reject with evidence instead of a story.</p></div>
+      <div class="card reveal"><h3>Prop firm / broker</h3><p>A cost-realistic case study that shows why most retail strategies fail. Use it to educate clients, reduce churn, and set honest expectations.</p></div>
+      <div class="card reveal"><h3>Quant researcher</h3><p>A reusable engine, pre-registration template, and inference suite. Start the next study from a tested baseline instead of a blank page.</p></div>
+      <div class="card reveal"><h3>University lecturer / student</h3><p>A complete teaching case with data, code, tests, and a paper. Teach backtesting, overfitting, and reproducibility with a real example.</p></div>
+      <div class="card reveal"><h3>Data vendor</h3><p>Integrity checks, cross-vendor validation, and a manifest. Demonstrate data quality with a public case study.</p></div>
+      <div class="card reveal"><h3>Builder / founder</h3><p>A forkable research template with Docker and tests. Ship a credible research page for your own idea.</p></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="card reveal">
+        <h3>What you get</h3>
+        <ul class="checklist">
+          <li>Pre-registered protocol and deviation log</li>
+          <li>Deterministic strategy engine and data pipeline</li>
+          <li>Development, validation, and sealed holdout outputs</li>
+          <li>18-point parameter grid and ablations</li>
+          <li>Benchmarks, placebos, DSR, PBO, RC, SPA, BH, and bootstrap</li>
+          <li>Data-integrity and cross-vendor validation</li>
+          <li>Interactive report and 12-question course</li>
+          <li>11-page paper, figures, and reproducible commands</li>
+        </ul>
+      </div>
+      <div class="card gold reveal">
+        <h3>How to engage</h3>
+        <p class="small">The repository is available for evaluation. Commercial use, custom replication, integration support, and a private briefing are available under a written licence.</p>
+        <p class="small"><strong>Open an issue with the subject “Commercial licence”</strong> and describe the use case. You will get a scoped proposal, not a sales call.</p>
+        <p class="tiny quiet" style="margin-top:12px">Not financial advice. Past performance does not guarantee future results.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="reproduce">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Reproduce</span>
+      <h2>Run it, inspect it, challenge it</h2>
+      <p class="lead-sm">The pipeline is one command per stage. The tests are fast. The holdout guard is deliberate.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <h3>Quick start</h3>
+        <pre><code>git clone &lt;your-repository-url&gt; keylevel-mtf-research
+cd keylevel-mtf-research
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m pytest -q</code></pre>
+        <p class="table-note">Expected: <strong>6 tests pass</strong>. The tests cover causality, minimum touches, stop-first accounting, gap handling, session labels, and inference smoke tests.</p>
+        <h3 style="margin-top:20px">Full pipeline</h3>
+        <pre><code>make setup
+make download
+make build
+make test
+make development
+make validation
+make freeze
+make holdout
+make audit
+make live
+make report
+make pdf</code></pre>
+      </div>
+      <div class="reveal">
+        <h3>Repository map</h3>
+        <pre class="tree"><code>keylevel-mtf-research/
+├── README.md            public overview
+├── RESEARCH.md          long-form paper
+├── preview.html         this page
+├── paper/main.pdf       11-page manuscript
+├── preregistration/     protocol + deviations
+├── config/              parameters + instruments
+├── src/klab/            engine + statistics
+├── results/             trades, grid, audit, live
+├── tests/               6 tests
+├── assets/              screenshots + media
+├── Makefile             one command per stage
+└── CODE_FREEZE.json     27-file hash</code></pre>
+        <div class="callout" style="margin-top:14px"><strong>Holdout guard.</strong> <code>make holdout</code> refuses to run in the current tree because the holdout has already been opened. The opened outputs are retained under <code>results/holdout/</code>. This is a feature, not a bug.</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="reveal">
+        <h3>Publish this page</h3>
+        <ol class="small quiet" style="padding-left:20px">
+          <li>Push the repository to GitHub as a public repository.</li>
+          <li>Open <strong>Settings → Pages</strong>.</li>
+          <li>Under <strong>Build and deployment → Source</strong>, choose <strong>Deploy from a branch</strong>.</li>
+          <li>Choose branch <strong>main</strong> and folder <strong>/ (root)</strong>. Save.</li>
+          <li>The site appears at <code>https://&lt;user&gt;.github.io/&lt;repo&gt;/</code>.</li>
+        </ol>
+        <p class="table-note"><code>.nojekyll</code> and <code>index.html</code> are already included. No build step is required.</p>
+      </div>
+      <div class="reveal">
+        <h3>The method you can reuse</h3>
+        <ul class="checklist">
+          <li>Write the rules and success criteria before the test.</li>
+          <li>Freeze the code and hash it.</li>
+          <li>Keep a sealed holdout and open it once.</li>
+          <li>Charge realistic costs on both sides.</li>
+          <li>Compare with simple benchmarks.</li>
+          <li>Compare with random entries and random levels.</li>
+          <li>Correct for the number of trials.</li>
+          <li>Publish the negative result, not just the winner.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><span class="mark">KL</span> KeyLevel Lab</div>
+      <p class="small">A pre-registered replication and null result for multi-timeframe key-level trading. Built from verified results; every number is generated by the pipeline.</p>
+      <p class="tiny">Generated 02 November 2026 · Code freeze <code>bb94af28645d</code> · 27 frozen files · 2,930,707 bars · 14,602 trades.</p>
+      <p class="tiny">Not financial advice. Past performance does not guarantee future results.</p>
+      <a class="backtop" href="#top">↑ Back to top</a>
+    </div>
+    <div>
+      <p class="small"><strong>Read more</strong></p>
+      <p class="small"><a href="../README.md">Public overview</a><br><a href="../RESEARCH.md">Long-form report</a><br><a href="../paper/main.pdf">Academic paper</a></p>
+      <p class="small"><strong>Licence</strong><br>Evaluation permitted. Commercial use requires a written licence. See <a href="../LICENSE.md">LICENSE.md</a>.</p>
+    </div>
+  </div>
+</footer>
+
+<noscript>
+  <div class="wrap"><div class="callout" style="margin:20px 0">JavaScript is off. The charts and the headline verdict are still visible. Enable JavaScript for the cost explorer, the grid filter, and the 12-question course.</div></div>
+</noscript>
+
+<script>
+const DATA = {"generated":"2026-11-02 14:40 UTC","freeze":"bb94af28645d","n_trials":28,"stages":{"development":{"n_trades":7891,"gross_r":-0.015442391323708109,"avg_r":-0.20536348805837756,"ann_return":-0.6238407328105533,"sharpe":-3.5184867489420664,"max_drawdown":-0.9997068455859955,"win_rate":0.29071093650994806,"profit_factor":0.746569260756183,"stop_rate":0.6525155240147003,"target_rate":0.18717526295780001,"time_rate":0.029273856291978203},"validation":{"n_trades":3556,"gross_r":0.0020435059872491437,"avg_r":-0.12127140667971854,"ann_return":-0.5371601395576889,"sharpe":-2.399636928241964,"max_drawdown":-0.9161952358455768,"win_rate":0.3076490438695163,"profit_factor":0.8383316427149444,"stop_rate":0.6425759280089989,"target_rate":0.21456692913385828,"time_rate":0.025871766029246346},"holdout":{"n_trades":3155,"gross_r":-0.027535204333922564,"avg_r":-0.16580675380746734,"ann_return":-0.55885081831752,"sharpe":-2.7889345331169793,"max_drawdown":-0.9244859283839113,"win_rate":0.29381933438985736,"profit_factor":0.789330750136572,"stop_rate":0.6586370839936608,"target_rate":0.19239302694136293,"time_rate":0.03359746434231379},"validation_winner":{"n_trades":1831,"gross_r":-0.019166189501933967,"avg_r":-0.16896955582682638,"ann_return":-0.3953913042439501,"sharpe":-2.1179962457399943,"max_drawdown":-0.8050607449209107,"win_rate":0.2648825778263244,"profit_factor":0.7953238440250819,"stop_rate":0.6952484980884762,"target_rate":0.1878754778809394,"time_rate":0.018569087930092845},"holdout_winner":{"n_trades":1460,"gross_r":0.025197005538138202,"avg_r":-0.14089601817029038,"ann_return":-0.25048829707877396,"sharpe":-1.346826440452104,"max_drawdown":-0.5983340837489615,"win_rate":0.2719178082191781,"profit_factor":0.8306290693866938,"stop_rate":0.6821917808219178,"target_rate":0.16506849315068492,"time_rate":0.03356164383561644}},"grid":[{"cluster_atr":1.0,"min_touches":3,"confirmation_closes":3,"n_trades":3675,"avg_r":-0.214772138891604,"sharpe":-2.256422425122384},{"cluster_atr":1.0,"min_touches":3,"confirmation_closes":2,"n_trades":4760,"avg_r":-0.1946936602758739,"sharpe":-2.457885733083683},{"cluster_atr":1.0,"min_touches":2,"confirmation_closes":3,"n_trades":4494,"avg_r":-0.2180585695625828,"sharpe":-2.61206037846427},{"cluster_atr":0.25,"min_touches":3,"confirmation_closes":3,"n_trades":5208,"avg_r":-0.2007743560955332,"sharpe":-2.686227313616548},{"cluster_atr":1.0,"min_touches":2,"confirmation_closes":2,"n_trades":5831,"avg_r":-0.1905673063938882,"sharpe":-2.753649713211801},{"cluster_atr":0.25,"min_touches":3,"confirmation_closes":2,"n_trades":6774,"avg_r":-0.1726654863113161,"sharpe":-2.78027356629596},{"cluster_atr":1.0,"min_touches":3,"confirmation_closes":1,"n_trades":7191,"avg_r":-0.1743025011622707,"sharpe":-2.839250094758243},{"cluster_atr":0.5,"min_touches":3,"confirmation_closes":2,"n_trades":6002,"avg_r":-0.2006966797535996,"sharpe":-2.9378036608206357},{"cluster_atr":0.25,"min_touches":3,"confirmation_closes":1,"n_trades":10071,"avg_r":-0.1555805875576396,"sharpe":-2.97710034008017},{"cluster_atr":0.5,"min_touches":3,"confirmation_closes":3,"n_trades":4609,"avg_r":-0.2386920922966239,"sharpe":-3.0864113185713657},{"cluster_atr":1.0,"min_touches":2,"confirmation_closes":1,"n_trades":8702,"avg_r":-0.1768170942001528,"sharpe":-3.234638561558987},{"cluster_atr":0.5,"min_touches":3,"confirmation_closes":1,"n_trades":8922,"avg_r":-0.1890232155730802,"sharpe":-3.334264560166645},{"cluster_atr":0.5,"min_touches":2,"confirmation_closes":2,"n_trades":7891,"avg_r":-0.2053634880583775,"sharpe":-3.518486748942071},{"cluster_atr":0.25,"min_touches":2,"confirmation_closes":3,"n_trades":7547,"avg_r":-0.2186136742012718,"sharpe":-3.599929090529369},{"cluster_atr":0.5,"min_touches":2,"confirmation_closes":3,"n_trades":6073,"avg_r":-0.2418813224282315,"sharpe":-3.6231002223576314},{"cluster_atr":0.25,"min_touches":2,"confirmation_closes":2,"n_trades":9712,"avg_r":-0.1931856666222854,"sharpe":-3.751816337089304},{"cluster_atr":0.25,"min_touches":2,"confirmation_closes":1,"n_trades":14328,"avg_r":-0.1693546781944773,"sharpe":-3.931561993547946},{"cluster_atr":0.5,"min_touches":2,"confirmation_closes":1,"n_trades":11709,"avg_r":-0.190899125180725,"sharpe":-3.9817713249864286}],"costs":[{"multiplier":0.0,"n_trades":3155,"avg_r":-0.0275352043339225,"sharpe":-0.4170652952271311,"max_drawdown":-0.4872168505047614},{"multiplier":1.0,"n_trades":3155,"avg_r":-0.1658067538074673,"sharpe":-2.7889345331169864,"max_drawdown":-0.924485928383912},{"multiplier":2.0,"n_trades":3155,"avg_r":-0.3040783032809263,"sharpe":-5.024402232182731,"max_drawdown":-0.9903951023715892},{"multiplier":3.0,"n_trades":3155,"avg_r":-0.4423498527544711,"sharpe":-7.048982608893796,"max_drawdown":-0.9987977632613114}],"bench":[{"variant":"buy_and_hold","label":"Buy & hold","ann_return":0.1174314571270269,"sharpe":1.9196118630423376,"max_drawdown":-0.0574998262212836},{"variant":"trend_only","label":"Trend filter","ann_return":-0.0268868848743438,"sharpe":-0.638940527572062,"max_drawdown":-0.0875811110762203},{"variant":"sma_50_200","label":"SMA 50/200","ann_return":0.0308084327531492,"sharpe":0.5121975782976281,"max_drawdown":-0.052222504443281},{"variant":"donchian_20","label":"Donchian 20","ann_return":-0.0277976696911437,"sharpe":-0.700025438019366,"max_drawdown":-0.0887393959981618}],"audit":{"level_tf":"ALL","side":0.0,"n":7891.0,"hold_rate":0.1549866937016854,"hit_1r_before_stop":0.4924597642884298,"hit_2r_before_stop":0.3131415536687365,"hit_3r_before_stop":0.2184767456596122,"mean_mfe_r":4.305597264297623,"median_mfe_r":2.772277227722747,"mean_mae_r":4.483903206677164},"integrity":[{"timeframe":"15min","series":8,"rows":2712083,"duplicate_ts":0,"ohlc_violations":0,"nonpositive":0},{"timeframe":"1D","series":8,"rows":32107,"duplicate_ts":0,"ohlc_violations":0,"nonpositive":0},{"timeframe":"1M","series":8,"rows":1344,"duplicate_ts":0,"ohlc_violations":0,"nonpositive":0},{"timeframe":"1W","series":8,"rows":5846,"duplicate_ts":0,"ohlc_violations":0,"nonpositive":0},{"timeframe":"4h","series":8,"rows":179327,"duplicate_ts":0,"ohlc_violations":0,"nonpositive":0}],"hold_symbols":[{"symbol":"AUDUSD","n_trades":601,"mean_r":-0.2801678031896785,"win_rate":0.30282861896838603},{"symbol":"USDCAD","n_trades":437,"mean_r":-0.28008392951065697,"win_rate":0.2723112128146453},{"symbol":"GBPUSD","n_trades":394,"mean_r":-0.24017393239360896,"win_rate":0.27411167512690354},{"symbol":"USDJPY","n_trades":418,"mean_r":-0.19598669056282902,"win_rate":0.2535885167464115},{"symbol":"SPXUSD","n_trades":269,"mean_r":-0.17894560927916112,"win_rate":0.275092936802974},{"symbol":"EURUSD","n_trades":470,"mean_r":-0.10552421903109863,"win_rate":0.30425531914893617},{"symbol":"XAUUSD","n_trades":249,"mean_r":-0.07144549654777241,"win_rate":0.30522088353413657},{"symbol":"NSXUSD","n_trades":317,"mean_r":0.1884254421137063,"win_rate":0.3753943217665615}],"symbols":[{"symbol":"EURUSD","n_trades":5,"n_signals":6,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:58:26","n_days":42.0,"ann_return":0.0177690967475234,"ann_vol":0.0630373913418841,"sharpe":0.3098113116599522,"sortino":0.7794037083376714,"max_drawdown":-0.0167057237329656,"calmar":1.0636532144045616,"skew":4.870815563464447,"kurtosis":33.07041815698471,"win_rate":0.2,"avg_r":0.1301979793016721,"median_r":-1.0677422736133606,"profit_factor":1.1625148666265792,"avg_bars":16.0,"stop_rate":0.6,"target_rate":0.2,"time_rate":0.0,"trend_flip_rate":0.2},{"symbol":"GBPUSD","n_trades":27,"n_signals":39,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:58:26","n_days":42.0,"ann_return":0.1601387769601319,"ann_vol":0.1018546064708223,"sharpe":1.5081801147361789,"sortino":2.950994280683091,"max_drawdown":-0.0454337144537978,"calmar":3.5246683852578062,"skew":1.430538845955346,"kurtosis":6.581402404080398,"win_rate":0.4444444444444444,"avg_r":0.2528862688816922,"median_r":-1.053887491081128,"profit_factor":1.3939317537330678,"avg_bars":20.55555555555556,"stop_rate":0.5185185185185185,"target_rate":0.3333333333333333,"time_rate":0.0,"trend_flip_rate":0.1481481481481481},{"symbol":"USDJPY","n_trades":30,"n_signals":67,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:59:24","n_days":42.0,"ann_return":-0.2203232215828957,"ann_vol":0.1004886191456015,"sharpe":-2.4264187543057725,"sortino":-3.2018753162420968,"max_drawdown":-0.0406308110104205,"calmar":-5.422565193847341,"skew":0.4256079219773302,"kurtosis":5.196230116001592,"win_rate":0.2333333333333333,"avg_r":-0.2709194112101974,"median_r":-1.0529106324047408,"profit_factor":0.641878909023719,"avg_bars":14.333333333333334,"stop_rate":0.6666666666666666,"target_rate":0.1666666666666666,"time_rate":0.0,"trend_flip_rate":0.1666666666666666},{"symbol":"AUDUSD","n_trades":8,"n_signals":13,"first_15m":"2026-09-04 12:00:00","last_15m":"2026-11-02 11:59:26","n_days":42.0,"ann_return":-0.1811102918391951,"ann_vol":0.0687766233392099,"sharpe":-2.8700725562144926,"sortino":-3.042341199366032,"max_drawdown":-0.0333559800708049,"calmar":-5.429619859909708,"skew":-3.424627193561104,"kurtosis":20.654437990607047,"win_rate":0.375,"avg_r":-0.8224745798123656,"median_r":-1.1397620752640791,"profit_factor":0.2682765812369189,"avg_bars":20.125,"stop_rate":0.625,"target_rate":0.125,"time_rate":0.0,"trend_flip_rate":0.25},{"symbol":"USDCAD","n_trades":52,"n_signals":211,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:59:32","n_days":42.0,"ann_return":-0.2100716280247025,"ann_vol":0.1140374477482819,"sharpe":-2.011216256859571,"sortino":-2.6397950124951137,"max_drawdown":-0.0580039410595145,"calmar":-3.6216785305874297,"skew":0.1702636373654003,"kurtosis":3.451212977761344,"win_rate":0.3269230769230769,"avg_r":-0.1470217748731528,"median_r":-1.0853533387936385,"profit_factor":0.7889034397327096,"avg_bars":30.673076923076923,"stop_rate":0.5961538461538461,"target_rate":0.2307692307692307,"time_rate":0.0961538461538461,"trend_flip_rate":0.0769230769230769},{"symbol":"XAUUSD","n_trades":26,"n_signals":43,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:49:16","n_days":42.0,"ann_return":-0.1706358288763713,"ann_vol":0.0927657747305042,"sharpe":-1.9710626462926657,"sortino":-2.898617027644036,"max_drawdown":-0.0510301146572251,"calmar":-3.343826092152657,"skew":1.584720177894367,"kurtosis":12.19272635143996,"win_rate":0.2692307692307692,"avg_r":-0.2344194274688422,"median_r":-1.0256685069046192,"profit_factor":0.6792915166736496,"avg_bars":28.653846153846157,"stop_rate":0.6923076923076923,"target_rate":0.1153846153846153,"time_rate":0.1153846153846153,"trend_flip_rate":0.0769230769230769},{"symbol":"SPXUSD","n_trades":2,"n_signals":6,"first_15m":"2026-09-04 13:30:00","last_15m":"2026-10-30 20:00:00","n_days":41.0,"ann_return":-0.0531476409099992,"ann_vol":0.0200231490845422,"sharpe":-2.7173335542526504,"sortino":-2.7106856809785373,"max_drawdown":-0.0088459446270856,"calmar":-6.008136287363243,"skew":-6.311657545259249,"kurtosis":43.14862953154766,"win_rate":0.0,"avg_r":-0.8852351466819162,"median_r":-0.8852351466819162,"profit_factor":0.0,"avg_bars":14.0,"stop_rate":0.5,"target_rate":0.0,"time_rate":0.0,"trend_flip_rate":0.5},{"symbol":"NSXUSD","n_trades":8,"n_signals":13,"first_15m":"2026-09-04 13:30:00","last_15m":"2026-10-30 20:00:00","n_days":41.0,"ann_return":-0.0856621864011274,"ann_vol":0.0376458774753237,"sharpe":-2.3600465858282784,"sortino":-2.726087075254852,"max_drawdown":-0.0219679911941916,"calmar":-3.8994091741886914,"skew":-1.5872715207566266,"kurtosis":13.916890716587671,"win_rate":0.25,"avg_r":-0.3613776794496075,"median_r":-1.013967474710229,"profit_factor":0.4682183585669736,"avg_bars":12.125,"stop_rate":0.625,"target_rate":0.25,"time_rate":0.125,"trend_flip_rate":0.0},{"symbol":"BTCUSD","n_trades":22,"n_signals":42,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:59:44","n_days":42.0,"ann_return":0.0370081216794258,"ann_vol":0.0904626311154863,"sharpe":0.4453455366811142,"sortino":1.0518670525282194,"max_drawdown":-0.0331676356065115,"calmar":1.115790167212288,"skew":3.4556887926979374,"kurtosis":18.38994233649622,"win_rate":0.3181818181818182,"avg_r":0.067795841103117,"median_r":-1.136386609715865,"profit_factor":1.084255595739209,"avg_bars":16.272727272727273,"stop_rate":0.5909090909090909,"target_rate":0.2272727272727272,"time_rate":0.0,"trend_flip_rate":0.1818181818181818},{"symbol":"ETHUSD","n_trades":27,"n_signals":39,"first_15m":"2026-09-04 11:45:00","last_15m":"2026-11-02 11:59:48","n_days":42.0,"ann_return":-0.2449713979256041,"ann_vol":0.0737074739066674,"sharpe":-3.7741765099174818,"sortino":-4.357178949047836,"max_drawdown":-0.0506951457610582,"calmar":-4.832245656817506,"skew":-0.415164191673737,"kurtosis":5.057495906494838,"win_rate":0.2962962962962963,"avg_r":-0.1736401771322373,"median_r":-1.12732653358486,"profit_factor":0.8003939549958575,"avg_bars":17.666666666666668,"stop_rate":0.5925925925925926,"target_rate":0.1851851851851851,"time_rate":0.037037037037037,"trend_flip_rate":0.1851851851851851}],"live":{"mean_r":-0.1392597354267979,"n_trades":207,"per_symbol_mean_r":{"AUDUSD":-0.8224745798123656,"BTCUSD":0.067795841103117,"ETHUSD":-0.17364017713223734,"EURUSD":0.13019797930167218,"GBPUSD":0.25288626888169224,"NSXUSD":-0.3613776794496075,"SPXUSD":-0.8852351466819162,"USDCAD":-0.14702177487315285,"USDJPY":-0.27091941121019747,"XAUUSD":-0.2344194274688422},"profit_factor":0.8159720052430011,"win_rate":0.30917874396135264},"tokens":{"hold_trades":"3,155","hold_r":"-0.166","hold_sharpe":"-2.79","hold_dd":"92.45%","hold_win":"29.4%","hold_pf":"0.79","dsr_base":"1.14e-23","pbo":"0.1071","re_p":"0.7180","rl_p":"0.0000","bars":"2,930,707","series":"40"}};
+const $ = (id) => document.getElementById(id);
+
+const nf = (v, d = 2) => (v === null || v === undefined || !isFinite(v)) ? "—" : Number(v).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
+const pf = (v, d = 1) => (v === null || v === undefined || !isFinite(v)) ? "—" : (100 * Number(v)).toFixed(d) + "%";
+const sf = (v, d = 3) => (v === null || v === undefined || !isFinite(v)) ? "—" : (Number(v) >= 0 ? "+" : "") + Number(v).toFixed(d);
+const negClass = (v) => Number(v) < 0 ? "neg" : "pos";
+
+function renderTable(bodyId, headers, rows) {
+  const body = $(bodyId);
+  if (!body) return;
+  body.replaceChildren();
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    row.forEach((cell, i) => {
+      const td = document.createElement("td");
+      td.textContent = String(cell);
+      if (i > 0 && /^[+-]?[0-9]/.test(String(cell)) && String(cell).includes("-")) td.className = "neg";
+      if (i > 0 && String(cell).startsWith("+") && !String(cell).startsWith("+-")) td.className = "pos";
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function renderHeadline() {
+  const d = DATA.stages.development, v = DATA.stages.validation, h = DATA.stages.holdout;
+  const rows = [
+    ["Trades", d.n_trades.toLocaleString(), v.n_trades.toLocaleString(), h.n_trades.toLocaleString()],
+    ["Mean gross R", sf(d.gross_r), sf(v.gross_r), sf(h.gross_r)],
+    ["Mean net R", sf(d.avg_r), sf(v.avg_r), sf(h.avg_r)],
+    ["Annualised net Sharpe", nf(d.sharpe), nf(v.sharpe), nf(h.sharpe)],
+    ["Maximum drawdown", pf(d.max_drawdown, 2), pf(v.max_drawdown, 2), pf(h.max_drawdown, 2)],
+    ["Win rate", pf(d.win_rate), pf(v.win_rate), pf(h.win_rate)],
+    ["Profit factor", nf(d.profit_factor), nf(v.profit_factor), nf(h.profit_factor)]
+  ];
+  renderTable("headlineBody", [], rows);
+}
+
+function renderBench() {
+  const rows = DATA.bench.map((r) => [r.label || r.variant.replace(/_/g, " "), pf(r.ann_return), nf(r.sharpe), pf(r.max_drawdown, 2)]);
+  const h = DATA.stages.holdout;
+  rows.push(["key levels (holdout)", pf(h.ann_return), nf(h.sharpe), pf(h.max_drawdown, 2)]);
+  const body = $("benchBody");
+  body.replaceChildren();
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    row.forEach((cell, i) => {
+      const td = document.createElement("td");
+      td.textContent = String(cell);
+      if (i === 2) td.className = Number(cell) < 0 ? "neg" : "pos";
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+function renderSymbols() {
+  renderTable("symbolBody", [], DATA.hold_symbols.map((r) => [r.symbol, r.n_trades.toLocaleString(), sf(r.mean_r), pf(r.win_rate)]));
+}
+
+function renderLive() {
+  renderTable("liveBody", [], DATA.symbols.map((r) => [r.symbol, r.n_trades.toLocaleString(), sf(r.avg_r), pf(r.win_rate)]));
+}
+
+function renderIntegrity() {
+  renderTable("integrityBody", [], DATA.integrity.map((r) => [r.timeframe, r.series.toLocaleString(), r.rows.toLocaleString(), r.duplicate_ts.toLocaleString(), r.ohlc_violations.toLocaleString(), r.nonpositive.toLocaleString()]));
+}
+
+function renderGrid() {
+  const filter = $("clusterFilter").value;
+  const rows = DATA.grid.filter((r) => filter === "all" || Math.abs(r.cluster_atr - Number(filter)) < 1e-9);
+  $("gridCaption").textContent = filter === "all"
+    ? "All pre-registered variants, sorted by net Sharpe."
+    : "Cluster width " + Number(filter).toFixed(2) + " × ATR, sorted by net Sharpe.";
+  renderTable("gridBody", [], rows.map((r) => [r.cluster_atr.toFixed(2) + " / " + r.min_touches + " / " + r.confirmation_closes, r.n_trades.toLocaleString(), sf(r.avg_r), nf(r.sharpe)]));
+}
+
+function renderCostExplorer() {
+  const value = Number($("costRange").value);
+  const row = DATA.costs.find((r) => Math.abs(r.multiplier - value) < 1e-9) || DATA.costs[0];
+  $("costTrades").textContent = row.n_trades.toLocaleString();
+  $("costR").textContent = sf(row.avg_r);
+  $("costSharpe").textContent = nf(row.sharpe);
+  const max = Math.max.apply(null, DATA.costs.map((r) => Math.abs(r.avg_r))) || 1;
+  const bars = $("costBars");
+  bars.replaceChildren();
+  DATA.costs.forEach((r) => {
+    const line = document.createElement("div");
+    line.className = "bar-row" + (Math.abs(r.multiplier - value) < 1e-9 ? " active" : "");
+    const label = document.createElement("span");
+    label.textContent = r.multiplier.toFixed(0) + "×";
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = Math.max(2, Math.abs(r.avg_r) / max * 100) + "%";
+    track.appendChild(fill);
+    const val = document.createElement("span");
+    val.textContent = sf(r.avg_r);
+    line.appendChild(label); line.appendChild(track); line.appendChild(val);
+    bars.appendChild(line);
+  });
+}
+
+/* Quiz */
+const QUIZ = [
+  {level:"Beginner", q:"In this research, what does 1R represent?", options:["One dollar of profit","The amount risked on a trade","One year of returns","The first round of testing"], correct:1, why:"R normalises every trade by the risk taken. +2R means you made twice your risk; -1R means you lost the full risk."},
+  {level:"Beginner", q:"What is a sealed holdout?", options:["Data used to tune the strategy","Data never used during development, opened once","A second copy of the development data","A broker account"], correct:1, why:"A holdout is the closest thing in a backtest to a real out-of-sample test. Opening it once prevents repeated peeking."},
+  {level:"Beginner", q:"The holdout mean net R was -0.166. What does that mean?", options:["The strategy made 16.6% per trade","The strategy lost on average 0.166 times the risk per trade after costs","The strategy won 16.6% of trades","The strategy lost 16.6% of the account per year"], correct:1, why:"Mean net R is the average result per trade after costs, expressed in units of risk. Negative means the average trade lost money."},
+  {level:"Beginner", q:"Why do costs matter so much in this study?", options:["They are charged only on winning trades","They are tiny and can be ignored","They are charged on both sides of thousands of trades and can turn a small edge negative","They only affect crypto"], correct:2, why:"The model charges half-spread plus slippage on entry and exit. Small per-trade costs compound over thousands of trades."},
+  {level:"Beginner", q:"What was the pre-registered success criterion?", options:["A positive gross mean R only","A positive net mean R and a positive net Sharpe on the sealed holdout","A win rate above 50%","A drawdown below 10%"], correct:1, why:"The protocol required both a positive net mean R and a positive net Sharpe on the sealed holdout. The result failed both."},
+  {level:"Analyst", q:"The random-entry placebo had p = 0.718. What is the plain reading?", options:["The strategy is significantly better than random","The strategy is not statistically better than random entries with the same geometry","Random entries are illegal","The test was inconclusive because p > 0.05"], correct:1, why:"A high p-value means the observed result is not unusual under the placebo. The entry rule did not add measurable value over random entries."},
+  {level:"Analyst", q:"What does the probability of backtest overfitting (PBO) estimate?", options:["The chance the code has a bug","The chance the in-sample winner underperforms out of sample","The chance the data are fake","The chance the broker rejects an order"], correct:1, why:"PBO estimates how often the selected winner ranks poorly out of sample. Here it is modest only because the whole set loses."},
+  {level:"Analyst", q:"What does the deflated Sharpe ratio correct for?", options:["Inflation","The number of trials and non-normal returns","The bid-ask spread only","The time zone of the data"], correct:1, why:"A high Sharpe from a large search is less impressive than the same Sharpe from one pre-registered test. The deflated Sharpe adjusts for that."},
+  {level:"Analyst", q:"The strict hold rate was 15.5%. What does that mean?", options:["15.5% of trades made money","15.5% of executed signals saw no close through the level over the next 96 bars","15.5% of levels were monthly","15.5% of the data were missing"], correct:1, why:"The strict hold measure asks whether the level survived without a close through it. Only 15.5% did."},
+  {level:"Professional", q:"Which comparison is the strongest challenge to the claim that the entry rule is special?", options:["Comparing with buy-and-hold only","Comparing with random entries that use the same stop and target geometry","Comparing with a different broker","Comparing the first year with the last year"], correct:1, why:"The random-entry placebo holds the risk geometry fixed and randomises the entry. If the rule cannot beat it, the entry is not adding value."},
+  {level:"Professional", q:"Why is a negative result still valuable to a business?", options:["It guarantees future profits","It prevents capital from being allocated to a rule that does not work and provides a reusable test process","It proves all technical analysis is useless","It avoids the need for data"], correct:1, why:"The value is avoided loss plus a repeatable filter. The method can be applied to the next idea before money is committed."},
+  {level:"Professional", q:"You are given a new strategy with a high backtest Sharpe. What is the best due-diligence order?", options:["Trust the Sharpe, then check the code","Check the marketing, then run one backtest","Pre-register the rules, use a sealed holdout, charge realistic costs, compare with benchmarks and placebos, and correct for multiple trials","Optimise the settings until the Sharpe is highest"], correct:2, why:"That sequence controls the four biggest sources of false confidence: hindsight, cost blindness, weak comparisons, and selection bias."}
+];
+
+let qIndex = 0;
+let qScore = 0;
+let qAnswered = false;
+
+function renderQuestion() {
+  const q = QUIZ[qIndex];
+  qAnswered = false;
+  $("quizResult").classList.remove("show");
+  $("quizForm").style.display = "";
+  $("quizFieldset").style.display = "";
+  $("quizLevel").textContent = q.level;
+  $("quizProgressText").textContent = "Question " + (qIndex + 1) + " of " + QUIZ.length;
+  $("quizProgress").setAttribute("aria-valuenow", String(qIndex));
+  $("quizProgressBar").style.width = (qIndex / QUIZ.length * 100) + "%";
+  $("quizLegend").textContent = q.q;
+  $("quizLegend").tabIndex = -1;
+  const options = $("quizOptions");
+  options.replaceChildren();
+  q.options.forEach((text, i) => {
+    const label = document.createElement("label");
+    label.className = "option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "q" + qIndex;
+    input.value = String(i);
+    const span = document.createElement("span");
+    span.textContent = text;
+    label.appendChild(input);
+    label.appendChild(span);
+    options.appendChild(label);
+  });
+  $("checkBtn").hidden = false;
+  $("nextBtn").hidden = true;
+  $("restartBtn").hidden = true;
+  const feedback = $("quizFeedback");
+  feedback.className = "feedback neutral";
+  feedback.textContent = "Choose an answer, then check it.";
+  $("quizLegend").focus();
+}
+
+function checkAnswer() {
+  if (qAnswered) return;
+  const selected = document.querySelector('input[name="q' + qIndex + '"]:checked');
+  const feedback = $("quizFeedback");
+  if (!selected) {
+    feedback.className = "feedback neutral";
+    feedback.textContent = "Choose an answer first.";
+    return;
+  }
+  qAnswered = true;
+  const q = QUIZ[qIndex];
+  const chosen = Number(selected.value);
+  const labels = $("quizOptions").querySelectorAll("label");
+  labels.forEach((label, i) => {
+    label.classList.toggle("correct", i === q.correct);
+    label.classList.toggle("wrong", i === chosen && chosen !== q.correct);
+    const input = label.querySelector("input");
+    input.disabled = true;
+  });
+  if (chosen === q.correct) {
+    qScore += 1;
+    feedback.className = "feedback correct";
+    feedback.textContent = "Correct. " + q.why;
+  } else {
+    feedback.className = "feedback wrong";
+    feedback.textContent = "Not quite. " + q.why;
+  }
+  $("checkBtn").hidden = true;
+  $("nextBtn").hidden = false;
+  $("nextBtn").textContent = qIndex === QUIZ.length - 1 ? "See my score →" : "Next question →";
+  $("nextBtn").focus();
+}
+
+function nextQuestion() {
+  qIndex += 1;
+  if (qIndex >= QUIZ.length) {
+    showResult();
+    return;
+  }
+  renderQuestion();
+}
+
+function showResult() {
+  $("quizProgress").setAttribute("aria-valuenow", String(QUIZ.length));
+  $("quizProgressBar").style.width = "100%";
+  $("quizForm").style.display = "none";
+  const result = $("quizResult");
+  result.classList.add("show");
+  $("resultScore").textContent = qScore + " / " + QUIZ.length;
+  let tier = "Start here";
+  let text = "Read the beginner guide, then come back. The quiz is designed to teach, not to trick.";
+  if (qScore >= 10) { tier = "Research lead"; text = "You can challenge a strategy pitch and explain why the evidence does or does not support it."; }
+  else if (qScore >= 7) { tier = "Analyst"; text = "You understand the core controls. Review the evidence section to sharpen the details."; }
+  else if (qScore >= 4) { tier = "Foundation"; text = "You have the basics. Read the beginner guide and retake the quiz."; }
+  $("resultTier").textContent = tier;
+  $("resultText").textContent = text;
+  $("restartBtn2").focus();
+}
+
+function restartQuiz() {
+  qIndex = 0;
+  qScore = 0;
+  qAnswered = false;
+  renderQuestion();
+}
+
+$("quizForm").addEventListener("submit", (event) => { event.preventDefault(); checkAnswer(); });
+$("nextBtn").addEventListener("click", nextQuestion);
+$("restartBtn").addEventListener("click", restartQuiz);
+$("restartBtn2").addEventListener("click", restartQuiz);
+$("costRange").addEventListener("input", renderCostExplorer);
+$("clusterFilter").addEventListener("change", renderGrid);
+
+renderHeadline();
+renderBench();
+renderSymbols();
+renderLive();
+renderIntegrity();
+renderGrid();
+renderCostExplorer();
+renderQuestion();
+
+/* Reveal on scroll */
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (!reduce && "IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("in");
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+} else {
+  document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+}
+</script>
+</body>
+</html>

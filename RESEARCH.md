@@ -1,6 +1,6 @@
 # Multi-Timeframe Key Levels: A Pre-Registered Replication and Null Result
 
-**Working paper / reproducible research repository.**  Generated 2026-11-02 14:34 UTC from `results/`; every number below is read from a machine-produced table.  The strategy is an explicit operationalisation of a discretionary Arabic-language practitioner transcript, not a claim about the individual trader.
+**Working paper / reproducible research repository.**  Generated 2026-11-02 14:40 UTC from `results/`; every number below is read from a machine-produced table.  The strategy is an explicit operationalisation of a discretionary Arabic-language practitioner transcript, not a claim about the individual trader.
 
 ## Abstract
 

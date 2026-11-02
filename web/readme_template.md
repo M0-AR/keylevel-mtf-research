@@ -453,6 +453,8 @@ A good research asset states its limits. This one does.
 
 [**{{PREVIEW_LABEL}} →**]({{PREVIEW_URL}})
 
+**Direct links:** [Live report]({{PAGES_ROOT}}) · [preview.html]({{PAGES_PREVIEW}}) · [docs/preview.html]({{PAGES_DOCS}})
+
 ![KeyLevel Lab interactive report](assets/demo.gif)
 
 *The interactive report: verdict cards, real charts, a cost explorer, and a 12-question course from beginner to professional.*
@@ -551,7 +553,7 @@ The image is about 918 MB and contains the full pipeline. Raw data are mounted f
 | `make holdout` | Opens the sealed sample once (blocked after the first open) |
 | `make audit` | Checks data quality, cross-vendor agreement, and level reactions |
 | `make live` | Runs the descriptive 2026 shadow |
-| `make report` | Rebuilds this README, the interactive report, and the paper source |
+| `make report` | Rebuilds this README, the interactive report (root and `/docs` mirrors), and the paper source |
 | `make pdf` | Compiles the paper with TeX Live in Docker |
 | `make test` | Runs the 6 automated tests |
 
@@ -565,6 +567,10 @@ keylevel-mtf-research/
 ├── RESEARCH.md                ← long-form generated working paper
 ├── preview.html               ← interactive report (GitHub Pages entry)
 ├── index.html                 ← same page, served at the site root
+├── docs/
+│   ├── preview.html           ← mirror served at /docs/preview.html
+│   ├── index.html             ← mirror for the /docs source setting
+│   └── .nojekyll
 ├── .nojekyll                  ← tells GitHub Pages to serve the files directly
 ├── paper/
 │   ├── main.tex               ← manuscript source
@@ -612,6 +618,7 @@ The repository already contains everything GitHub Pages needs:
 
 - `index.html` — the page served at the site root
 - `preview.html` — the same page at a friendly path
+- `docs/preview.html` — a mirror served at `/docs/preview.html`
 - `.nojekyll` — disables Jekyll and serves the files exactly as built
 - `assets/` — screenshots, GIF, video, and social preview
 
@@ -629,6 +636,22 @@ The repository already contains everything GitHub Pages needs:
    ```
 
 7. Optional: add a custom domain in the same **Pages** screen.
+
+With the source set to **`/ (root)`**, all three entry points resolve:
+
+- [Live report]({{PAGES_ROOT}})
+- [preview.html]({{PAGES_PREVIEW}})
+- [docs/preview.html]({{PAGES_DOCS}})
+
+Verify after the deployment finishes (expect `200` for all three):
+
+```bash
+BASE="https://<your-username>.github.io/<your-repository>"
+for p in "" preview.html docs/preview.html; do
+  printf "/%s -> " "$p"
+  curl -s -o /dev/null -w "%{http_code}\n" "$BASE/$p"
+done
+```
 
 **Why `.nojekyll` matters.** GitHub Pages uses Jekyll by default. This is a hand-built static page, not a Jekyll site. The empty `.nojekyll` file at the repository root tells Pages to publish the files directly. Without it, some assets and paths can be skipped.
 
